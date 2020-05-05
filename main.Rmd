@@ -1,0 +1,143 @@
+---
+title             : "Accurate plant pathogen effector protein classification _ab initio_ with **deepredeff**, an ensemble of convolutional neural networks."
+shorttitle        : "CNNs for classifying effector proteins"
+
+author: 
+  - name          : "Ruth Kristianingsih"
+    affiliation   : "1"
+    email         : "ruth.kristianingsih@tsl.ac.uk"
+  - name          : "Dan MacLean"
+    email         : "dan.maclean@tsl.ac.uk"
+    address       : "The Sainsbury Laboratory, University of East Anglia, Norwich, UK, NR4 7UH"
+    corresponding : yes    # Define only one corresponding author
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "The Sainsbury Laboratory"
+
+
+abstract: |
+  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
+  
+  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
+  
+  One sentence clearly stating the **general problem** being addressed by  this particular study.
+  
+  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
+  
+  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
+  
+  One or two sentences to put the results into a more **general context**.
+  
+  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+  <!-- keywords          : "keywords" 
+  wordcount         : "X" -->
+
+bibliography      : ["r-references.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+
+
+# Methods
+
+## Sequence Data Collection
+
+Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data kindly prepared on request by the team, the file can be accessed at ^[Ruth please provide this file, is there a link in a repo?]. The pipeline in Figure \@ref(fig:effectorcollection) outlines the steps
+
+```{r, effectorcollection, fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to Uniprot"}
+knitr::include_graphics(
+  "figures/effectorsequence_collection.png",
+                        )
+```
+
+
+## Procedure
+
+## Data analysis
+We used `r cite_r("r-references.bib")` for all our analyses.
+
+
+# Results
+
+## Sequence Collection
+
+The performance of the trained classifiers is dependent on the quality of the input training data, so it was important that as high quality set of annotated effectors as possible was collected. To this end we used PHI-Base [@phibase] as our primary sequence store. Sequences in PHI-Base are human curated from the literature and have therefore been noted in experimental studies. They do not derive from large scale annotations or contain hypothetical or predicted proteins. This attribute makes it ideal for our purposes as the effectors in PHI-Base are those that have been specifially reported as such in the published literature and are not of the class of sequences that are merely suspected of being effectors on the basis of carrying a secretion signal. To collect effector sequences we parsed a whole database text dump of version 4.8 ^[Ruth, who provided the text dump, was it Martin Urban? Where is the file in your repos?], all proteins marked as plant pathogen effectors were filtered with IDs and Uniprot IDs, then the sequence retrieved from UNIPROT. The sequences retrieved can be seen in the data file in this manuscript's repository ('effector_information.txt') ^[Ruth, can you point out where this data file is in your development repository]. Effector sequences were then divided into taxonomic groups as bacterial, fungal or oomycete derived accordingly. The total number of plant effectors per group can be seen in Table \@ref(tab:effsummary). The species and effector count in each group can be seen in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable)
+
+Sequences for non-effector, secreted proteins were collected using a similar pipeline. Randomly selected proteins from each species carrying secretion signals were extracted from Ensembl databases using the BioMart tool. For each species noted in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable) we collected an identical number of non-effector, secreted proteins to that collected in the effector set. This gave us a balanced data set of effector proteins as positive learning examples and non-effector secreted proteins as negative learning examples ^[Ruth, can you add more detail]
+
+```{r, effsummary}
+apa_table(
+  readr::read_tsv("tables/effectors_by_path_group.tab"),
+  digits = 0,
+  align = 'c',
+  caption = 'Effectors found in three major pathogen groups'
+)
+```
+
+```{r, bacefftable}
+apa_table(
+  readr::read_tsv("tables/bacterial_effector_count.tab"),
+  digits = 0,
+  align = 'c',
+  caption = 'Bacterial species contributing to the bacterial effector sequence set retrieved from PHI-Base'
+)
+```
+```{r, fungiefftable}
+apa_table(
+  readr::read_tsv("tables/fungal_effector_count.tab"),
+  digits = 0,
+  align = 'c',
+  caption = 'Fungal species contributing to the fungal effector sequence set retrieved from PHI-Base'
+)
+```
+```{r, oomefftable}
+apa_table(
+  readr::read_tsv("tables/oomycete_effector_count.tab"),
+  digits = 0,
+  align = 'c',
+  caption = 'Oomycete species contributing to the oomycete effector sequence set retrieved from PHI-Base'
+)
+```
+
+# Discussion
+
+
+\newpage
+
+# References
+```{r create_r-references}
+r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup
