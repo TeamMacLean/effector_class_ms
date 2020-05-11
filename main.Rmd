@@ -54,6 +54,7 @@ output            : papaja::apa6_pdf
 
 ```{r setup, include = FALSE}
 library("papaja")
+library(magrittr)
 ```
 
 ```{r analysis-preferences}
@@ -68,7 +69,9 @@ knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 
 ## Sequence Data Collection
 
-Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data kindly prepared on request by the team, the file can be accessed at [github.com/PHI-base/data](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in Figure \@ref(fig:effectorcollection) outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release `2019_05`, using the code in [github.com/TeamMacLean/ruth-effectors-prediction/](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [Ensembl Fungi](https://fungi.ensembl.org/index.html) and [Ensembl Protists](https://protists.ensembl.org/index.html) manually using the BioMart tools. Since BioMart tool is not supported the Ensembl Bacteria, then we downloaded whole genome data matching the bacteria effector data from [Ensembl Bacteria FTP](https://bacteria.ensembl.org/info/website/ftp/index.html) using the code in [github.com/TeamMacLean/ruth-effectors-prediction](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd). Additionally, we used SignalP 3.0 in order to get the secreted sequences. 
+Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data kindly prepared on request by the PHI-Base team, the file can be accessed at [https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in Figure \@ref(fig:effectorcollection) outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release 2019_05, using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [@yates_ensembl_2020] : specifically Ensembl Fungi, Protists and Bacteria manually using the BioMart tools [@smedley_biomart_2009]. Since the BioMart tool is not available on Ensembl Bacteria, we downloaded whole proteome protein sequnces from species matched to those from which the effector came using FTP. With these we used SignalP 3.0 [@dyrlov_bendtsen_improved_2004] in order to filter the secreted sequences and selected accordingly. ^[Ruth, what version of the code and what parameter settings did you use?] Redundant sequences were filtered using BLASTp [@camacho_blast_2009]. We achieved these steps using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd).
+
+
 
 ```{r, effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt"}
 knitr::include_graphics(
@@ -82,6 +85,23 @@ knitr::include_graphics(
 )
 ```
 
+## Encoding and Subsetting Sequences
+
+The sequences collected were encoded using either one-hot encoding (CNN-LSTM based models) or integer based encoding (CNN-GRU-LSTM models). Encoded sequences were split into taxon specific training, test and validation sets at a 60%, 20%, 20% split respectively as described in code at [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd)
+
+
+## Model Training
+
+We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-GRU, LSTM-Embedding,  GRU-Embedding. We trained each model using a basic random hyperparameter setting initialisation step followed by All training was performed in R ^[Ruth, Version?], Tensorflow ^[Ruth, Version?], Keras ^[Ruth, Version?], Python ^[Ruth, Version?] on machines ^[Ruth, Machine types] with  Gb RAM ^[Ruth, Amounts?].  
+
+### Hyperparameter Scans
+
+We performed a random search of hyperparameter effects by selecting ^[Ruth, how many? The report says 50, but it isn't clear whether this is 50 from 100 possible, or 50 from 50 possible - when you write something you need to keep in mind the question - 'How would my reader repeat this?' ] of all possible hyperparameters for each model type at random ^[Ruth, how is this done? Is there a script to reference?]. We applied five-fold cross validation at each combination and recorded model performance on the validation data at each iteration. Code for this can be found ^[Ruth, where?]. Final selected hyperparameter settings for models in each species group can be seen in Table \@ref(tab:hyperparam) 
+
+### Fine tuning
+
+With best performing models from hyperparameter scans we carried out a process of fine tuning manually to ensure that models did not over- or underfit data and were trained to be as general as possible. We loaded best performing models and assessed changes in selected parameters as described in Results to produce final models ^[Ruth, did you use anything like tensorboard or just R to manually tune the models?]. Once each model was tuned accordingly using the training and test sets, final classification testing and estimation of accuracy was done with the held-out validation set that the model had not seen until this point. The final models were saved into HDF5 objects and stored in the repository at [link](link) ^[Ruth, link please!]
+
 
 ## Procedure
 
@@ -93,9 +113,16 @@ We used `r cite_r("r-references.bib")` for all our analyses.
 
 ## Sequence Collection
 
-The performance of the trained classifiers is dependent on the quality of the input training data, so it was important that as high quality set of annotated effectors as possible was collected. To this end we used PHI-Base [@phibase] as our primary sequence store. Sequences in PHI-Base are human curated from the literature and have therefore been noted in experimental studies. They do not derive from large scale annotations or contain hypothetical or predicted proteins. This attribute makes it ideal for our purposes as the effectors in PHI-Base are those that have been specifially reported as such in the published literature and are not of the class of sequences that are merely suspected of being effectors on the basis of carrying a secretion signal. To collect effector sequences we parsed a whole database text dump of version 4.8 [https://github.com/PHI-base/data](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv), all proteins marked as plant pathogen effectors were filtered with IDs and UniProt IDs. These ID then were mapped to PHI-Base fasta. If the sequences are not available in PHI-Base fasta data, then the sequence retrieved from UniProt. The sequences retrieved can be seen in the data file in this manuscript's repository [(`effector_data.csv`)](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/data/getting-data-new/binary-class-data/effector_data.csv). Effector sequences were then divided into taxonomic groups as bacterial, fungal or oomycete derived accordingly. The total number of plant effectors per group can be seen in Table \@ref(tab:effsummary). The species and effector count in each group can be seen in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable)
+The performance of the trained classifiers is dependent on the quality of the input training data, so it was important that we collected as high a quality set of annotated effectors as possible. To this end we used PHI-Base [@phibase] as our primary sequence origin. Sequences in PHI-Base are human curated from the literature and have therefore been noted in experimental studies. They do not derive from large scale annotations or contain hypothetical or predicted proteins. This attribute makes it ideal for our purposes as the effectors in PHI-Base are those that have been specifically reported as such in the published literature and are not of the class of sequences that are merely suspected of being effectors on the basis of carrying a secretion signal. To collect effector sequences we parsed a whole database text dump of version 4.8 [https://github.com/PHI-base/data](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv), all proteins marked as plant pathogen effectors were filtered and we used the IDs and UniProt IDs to collect the protein sequences from PHI-Base or UniProt if PHI-Base stored only the ID. The sequences and IDs retrieved can be seen in the data file in this manuscript's repository [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/data/getting-data-new/binary-class-data/effector_data.csv](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/data/getting-data-new/binary-class-data/effector_data.csv). Effector sequences were then divided into taxonomic groups as bacterial, fungal or oomycete derived accordingly. The total number of plant effectors per group can be seen in Table \@ref(tab:effsummary). The species and effector count in each group can be seen in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable)
 
-Sequences for non-effector, secreted proteins were collected using a similar pipeline. Randomly selected proteins from each species carrying secretion signals were extracted from Ensembl databases using the BioMart tool. For each species noted in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable) we collected an identical number of non-effector, secreted proteins to that collected in the effector set. This gave us a balanced data set of effector proteins as positive learning examples and non-effector secreted proteins as negative learning examples. Figure \@ref(fig:noneffectorcollection) summaries the process of getting non-effector set. Using the gene information obtained from effector data, we downloaded secreted sequences from the same genome from each individual effector sequence depending on their availability on Ensembl Fungi and Ensembl Protists, otherwise we downloaded sequences from the same species as the individual effector. BioMart tool is used in this process.  However, BioMart tool is not supported for Ensembl Bacteria. Therefore, we downloaded the bacteria sequences using Ensembl Bacteria FTP. Additionaly, we only selected the secreted sequences from prediction results of SignalP ran on the downloaded data. We then blast the combination of both secreted sequences data downloaded manually using BioMart tool and using Ensembl FTP with the effector sequence data, and removed identical sequences. This process is done in order to make sure there is no effector data in our candidate non-effector sample. Last step in this process then was to sample an identical number of non-effector data as in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable). In this step, we also ran blast every time we took a sample, so that there is no identical sequences within non-effector set. The non-effector set sequences obtained can be seen in the data file in this manuscript's repository [(`non_effector_data.csv`)](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/secreted_data). 
+Sequences for non-effector, secreted proteins were collected using a similar pipeline. Randomly selected proteins from each species carrying secretion signals were extracted from Ensembl databases using the BioMart tool. For each species noted in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable) we collected an identical number of non-effector, secreted proteins to that collected in the effector set from either the same strain or species. This gave us a balanced data set of effector proteins as positive learning examples and non-effector secreted proteins as negative learning examples. Figure \@ref(fig:noneffectorcollection) summarises the process of building the non-effector set, and the full set of sequences and IDs retrieved can be seen in the following data file [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/secreted_data](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/secreted_data). 
+
+
+## Model Training
+
+TODO:
+
+comes to fig  21, 22, 23
 
 ```{r, effsummary}
 apa_table(
@@ -131,6 +158,16 @@ apa_table(
 )
 ```
 
+```{r, hyperparam }
+ readr::read_tsv("tables/hyperparamscan_info.tab") %>% 
+  knitr::kable( "latex", longtable = T, booktabs = T,
+           digits = 0,
+  align = 'c',
+  caption = 'Hyperparameters used in automatic scanning of hyperparameter space and best performing parameters values for each model'
+         ) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7) 
+
+```
 # Discussion
 
 

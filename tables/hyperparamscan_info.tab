@@ -1,0 +1,121 @@
+Group	Model	Paramater	BestValue
+Bacteria	 CNN-LSTM	strides	1
+Bacteria	 CNN-LSTM	padding	 valid
+Bacteria	 CNN-LSTM	optimizers	 Adadelta
+Bacteria	 CNN-LSTM	number_hidden_units	8
+Bacteria	 CNN-LSTM	filters_LSTM	16
+Bacteria	 CNN-LSTM	filters	16
+Bacteria	 CNN-LSTM	epochs	30
+Bacteria	 CNN-LSTM	batch_size	16
+Bacteria	 CNN-LSTM	activation_convolution	 None
+Bacteria	 CNN-LSTM	activation_LSTM	tanh 
+Bacteria	 CNN-GRU	reg_rate	0.001
+Bacteria	 CNN-GRU	optimizers	Adam
+Bacteria	 CNN-GRU	opt_go_backwards	TRUE
+Bacteria	 CNN-GRU	opt_dropout_recurrent	0
+Bacteria	 CNN-GRU	opt_dropout	0
+Bacteria	 CNN-GRU	maxpool_size	2
+Bacteria	 CNN-GRU	kernel_size	1
+Bacteria	 CNN-GRU	gru_hidden_units	16
+Bacteria	 CNN-GRU	filter_conv	16
+Bacteria	 CNN-GRU	epochs	30
+Bacteria	 CNN-GRU	batch_size	16
+Bacteria	 CNN-GRU	activation_conv	 None
+Bacteria	 LSTM Embedding	reg_rate	0.001
+Bacteria	 LSTM Embedding	outputdim	16
+Bacteria	 LSTM Embedding	optimizers	Adam
+Bacteria	 LSTM Embedding	opt_go_backwards	TRUE
+Bacteria	 LSTM Embedding	opt_dropout_recurrent	0
+Bacteria	 LSTM Embedding	opt_dropout	0.25
+Bacteria	 LSTM Embedding	lstm_hidden_units	16
+Bacteria	 LSTM Embedding	epochs	30
+Bacteria	 LSTM Embedding	batch_size	16
+Bacteria	 GRU Embedding	reg_rate	0.001
+Bacteria	 GRU Embedding	outputdim	48
+Bacteria	 GRU Embedding	optimizers	Adam
+Bacteria	 GRU Embedding	opt_go_backwards	FALSE
+Bacteria	 GRU Embedding	opt_dropout_recurrent	0
+Bacteria	 GRU Embedding	opt_dropout	0
+Bacteria	 GRU Embedding	gru_hidden_units	16
+Bacteria	 GRU Embedding	epochs	30
+Bacteria	 GRU Embedding	batch_size	16
+Fungi	 CNN-LSTM	strides	1
+Fungi	 CNN-LSTM	padding	valid
+Fungi	 CNN-LSTM	optimizers	Adadelta
+Fungi	 CNN-LSTM	number_hidden_units	8
+Fungi	 CNN-LSTM	filters_LSTM	16
+Fungi	 CNN-LSTM	filters	16
+Fungi	 CNN-LSTM	epochs	30
+Fungi	 CNN-LSTM	batch_size	16
+Fungi	 CNN-LSTM	activation_convolution	 None
+Fungi	 CNN-LSTM	activation_LSTM	tanh
+Fungi	 CRN-GRU	reg_rate	0.01
+Fungi	 CRN-GRU	optimizers	Adam
+Fungi	 CRN-GRU	opt_go_backwards	TRUE
+Fungi	 CRN-GRU	opt_dropout_recurrent	0
+Fungi	 CRN-GRU	opt_dropout	0
+Fungi	 CRN-GRU	maxpool_size	2
+Fungi	 CRN-GRU	kernel_size	1
+Fungi	 CRN-GRU	gru_hidden_units	8
+Fungi	 CRN-GRU	filter_conv	8
+Fungi	 CRN-GRU	epochs	60
+Fungi	 CRN-GRU	batch_size	8
+Fungi	 CRN-GRU	activation_conv	 None
+Fungi	 LSTM-EMBEDDING	reg_rate	0.01
+Fungi	 LSTM-EMBEDDING	outputdim	16
+Fungi	 LSTM-EMBEDDING	optimizers	Adam
+Fungi	 LSTM-EMBEDDING	opt_go_backwards	FALSE
+Fungi	 LSTM-EMBEDDING	opt_dropout_recurrent	0
+Fungi	 LSTM-EMBEDDING	opt_dropout	0
+Fungi	 LSTM-EMBEDDING	lstm_hidden_units	32
+Fungi	 LSTM-EMBEDDING	epochs	60
+Fungi	 LSTM-EMBEDDING	batch_size	8
+Fungi	 GRU-Embedding	reg_rate	0.001
+Fungi	 GRU-Embedding	outputdim	16
+Fungi	 GRU-Embedding	optimizers	Adam
+Fungi	 GRU-Embedding	opt_go_backwards	FALSE
+Fungi	 GRU-Embedding	opt_dropout_recurrent	0
+Fungi	 GRU-Embedding	opt_dropout	0
+Fungi	 GRU-Embedding	gru_hidden_units	16
+Fungi	 GRU-Embedding	epochs	30
+Fungi	 GRU-Embedding	batch_size	8
+Oomycete	CNN-LSTM	strides	1
+Oomycete	CNN-LSTM	padding	valid
+Oomycete	CNN-LSTM	optimizers	Adadelta
+Oomycete	CNN-LSTM	number_hidden_units	4
+Oomycete	CNN-LSTM	filters_LSTM	16
+Oomycete	CNN-LSTM	filters	8
+Oomycete	CNN-LSTM	epochs	30
+Oomycete	CNN-LSTM	batch_size	16
+Oomycete	CNN-LSTM	activation_convolution	None
+Oomycete	CNN-LSTM	activation_LSTM	tanh
+Oomycete	CNN-GRU	reg_rate	0.001
+Oomycete	CNN-GRU	optimizers	Adam
+Oomycete	CNN-GRU	opt_go_backwards	TRUE
+Oomycete	CNN-GRU	opt_dropout_recurrent	0.25
+Oomycete	CNN-GRU	opt_dropout	0
+Oomycete	CNN-GRU	maxpool_size	2
+Oomycete	CNN-GRU	kernel_size	2
+Oomycete	CNN-GRU	gru_hidden_units	8
+Oomycete	CNN-GRU	filter_conv	16
+Oomycete	CNN-GRU	epochs	30
+Oomycete	CNN-GRU	batch_size	8
+Oomycete	CNN-GRU	activation_conv	relu
+Oomycete	LSTM-Embedding	reg_rate	0.001
+Oomycete	LSTM-Embedding	outputdim	64
+Oomycete	LSTM-Embedding	optimizers	Adam
+Oomycete	LSTM-Embedding	opt_go_backwards	FALSE
+Oomycete	LSTM-Embedding	opt_dropout_recurrent	0
+Oomycete	LSTM-Embedding	opt_dropout	0
+Oomycete	LSTM-Embedding	lstm_hidden_units	32
+Oomycete	LSTM-Embedding	epochs	30
+Oomycete	LSTM-Embedding	batch_size	4
+Oomycete	GRU-Embedding	reg_rate	0.01
+Oomycete	GRU-Embedding	outputdim	32
+Oomycete	GRU-Embedding	optimizers	sgd
+Oomycete	GRU-Embedding	opt_go_backwards	TRUE
+Oomycete	GRU-Embedding	opt_dropout_recurrent	0.25
+Oomycete	GRU-Embedding	opt_dropout	0.25
+Oomycete	GRU-Embedding	gru_hidden_units	16
+Oomycete	GRU-Embedding	epochs	30
+Oomycete	GRU-Embedding	batch_size	4
