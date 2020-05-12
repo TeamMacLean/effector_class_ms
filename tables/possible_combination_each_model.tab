@@ -1,0 +1,5 @@
+Model	Possible combination
+CNN-LSTM	216
+CNN-GRU	288
+LSTM Embedding	128
+GRU Embedding	144
