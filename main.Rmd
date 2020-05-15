@@ -87,16 +87,16 @@ knitr::include_graphics(
 
 ## Encoding and Subsetting Sequences
 
-The sequences collected were encoded using either one-hot encoding (CNN-LSTM based models) or integer based encoding (CNN-GRU-LSTM models). Encoded sequences were split into taxon specific training, test and validation sets at a 60%, 20%, 20% split respectively as described in code at [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd)
+The sequences collected were encoded using either one-hot encoding (CNN-LSTM based models) or integer based encoding (CNN-GRU-LSTM models). Sequences were post-padded with zeroes to bring the vectors to identical lengths to each other and the longest sequence in the taxon data set ^[Ruth, what were the lengths for each model?]. Encoded sequences were split into taxon specific training, test and validation sets at a 60%, 20%, 20% split respectively as described in code at [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd)
 
 
 ## Model Training
 
-We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-GRU, LSTM-Embedding,  GRU-Embedding. We trained each model using a basic random hyperparameter setting initialisation step followed by All training was performed in R ^[Ruth, Version?], Tensorflow ^[Ruth, Version?], Keras ^[Ruth, Version?], Python ^[Ruth, Version?] on machines ^[Ruth, Machine types] with  Gb RAM ^[Ruth, Amounts?].  
+We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-GRU, LSTM-Embedding,  GRU-Embedding. We trained each model using a basic random hyperparameter setting initialisation step followed by manual tuning.  All training was performed in R ^[Ruth, Version?], Tensorflow ^[Ruth, Version?], Keras ^[Ruth, Version?], Python ^[Ruth, Version?] on machines ^[Ruth, Machine types] with  Gb RAM ^[Ruth, Amounts?].  
 
 ### Hyperparameter Scans
 
-We performed a random search of hyperparameter effects by selecting ^[Ruth, how many? The report says 50, but it isn't clear whether this is 50 from 100 possible, or 50 from 50 possible - when you write something you need to keep in mind the question - 'How would my reader repeat this?' ] of all possible hyperparameters for each model type at random ^[Ruth, how is this done? Is there a script to reference?]. We applied five-fold cross validation at each combination and recorded model performance on the validation data at each iteration. Code for this can be found ^[Ruth, where?]. Final selected hyperparameter settings for models in each species group can be seen in Table \@ref(tab:hyperparam) 
+We performed a random search of hyperparameter effects by selecting ^[Ruth, how many? The report says 50, but it isn't clear whether this is 50 from 100 possible, or 50 from 50 possible - when you write something you need to keep in mind the question - 'How would my reader repeat this?' ] of all possible hyperparameters for each model type at random ^[Ruth, how is this done? Is there a script to reference?]. We applied five-fold cross validation at each combination and recorded model performance on the validation data set at each iteration. Code for this can be found ^[Ruth, where?]. 
 
 ### Fine tuning
 
@@ -118,11 +118,27 @@ The performance of the trained classifiers is dependent on the quality of the in
 Sequences for non-effector, secreted proteins were collected using a similar pipeline. Randomly selected proteins from each species carrying secretion signals were extracted from Ensembl databases using the BioMart tool. For each species noted in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable) we collected an identical number of non-effector, secreted proteins to that collected in the effector set from either the same strain or species. This gave us a balanced data set of effector proteins as positive learning examples and non-effector secreted proteins as negative learning examples. Figure \@ref(fig:noneffectorcollection) summarises the process of building the non-effector set, and the full set of sequences and IDs retrieved can be seen in the following data file [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/secreted_data](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/secreted_data). 
 
 
-## Model Training
+## Model Selection and Training
 
-TODO:
+We selected four base architectures on which to build models for learning. Two of these contained Convolutional Neural Network (CNN) layers followed by either a Long Short Term Memory Layer (LSTM) or a Gated Recurrent Unit (GRU), two contained an Embedding Layer followed by the LSTM or GRU. All models had fully-connected dense layers after this. See Figure \@ref(fig:modelarch). Hyperparameter values for the models were identified using a random search as described in methods. Model variants within the hyperparameter search were assessed by comparing accuracy values on the development validation fraction of the training data. For each model type and taxon training data combination we selected the hyperparameter set giving highest accuracy on the validation set for manual tuning.  Final selected hyperparameter settings for models in each taxon can be seen in Table \@ref(tab:hyperparam), ^[Ruth, what were the actual best accuracy and loss values for the hyperparamter scan models selected and in Table \@ref(tab:hyperparam) , this table should have a column that shows this] a total of twelve models were produced, one for each taxon and model combination. 
 
-comes to fig  21, 22, 23
+We then manually ran and checked the accuracy and loss of the models on the training and validation sets to investigate instances of overfitting and assess generality. Smaller models are less likely to overfit data, so we investigated the effect of regularization rate, filter count and kernel size on the progress and accuracy of the model as we reduced the size. We found that by reducing the number of kernels on all models from 2 to 1 and the number of filters reduced from 32 to 16 we removed apparent overfitting and retained high accuracy, with training completing in 40 epochs. Final training progressions for each model in each taxon can be seen in Figure \@ref(fig:trainingprogress). We tested the finalised models on the hold-out test fraction of the data that had not been previously seen, for the four bacterial sequence trained models we had accuracies in the range 93.4 % to 97.4 %, for the four fungal models we observed accuracy in the range 60.5 % to 84.2 % and for the four oomycete models we saw accuracy from 64.7 % to 82.3 %, reported in table \@ref(tab:overall_model). All the models we generated had high statistical power and can accurately and reliably classify effectors from other secreted proteins in that taxon. 
+
+## Model Characteristics
+
+We examined the tendency of the models to call false positives or false negatives preferentially by creating confusion matrices of the classifications relative to the ground truth on the hold-out test data.\@ref(fig:confusionfinalmodels) The bacterial sequence trained models in general showed high accuracy and only one or two miscalls with no error bias except for the GRU-Embedding model which called five from 38 effectors as non effectors. The fungal sequence trained models were less accurate overall and showed a small amount more bias, again in the GRU-Embedding model, which was biased towards calling effectors as non-effectors and the CNN-LSTM model which was slightly biased in the opposite direction, calling non-effectors as effectors. The oomycete models were again quite balanced but the GRU-Embedding model showed a quite conservative tendancy calling 12 out of 17 effectors as non-effectors whilst getting all 17 non-effectors correct. Overall the models are accurate and show little to no bias with the exception of the GRU-Embedding type. In oomycete sequences in particular and in this class of model across the different sequence types showed itself to tend to call real effectors as not of that class. 
+
+Correlations between the ^[Add correlation to methods] calls \@ref(fig:model_corrs)
+
+## Ensemble Models
+
+## Ensemble Model Characteristics
+
+## Comparison With Other Classification Software
+
+## Convolution Heatmaps
+
+## Software Implementation
 
 ```{r, effsummary}
 apa_table(
@@ -141,6 +157,7 @@ apa_table(
   caption = 'Bacterial species contributing to the bacterial effector sequence set retrieved from PHI-Base'
 )
 ```
+
 ```{r, fungiefftable}
 apa_table(
   readr::read_tsv("tables/fungal_effector_count.tab"),
@@ -149,6 +166,7 @@ apa_table(
   caption = 'Fungal species contributing to the fungal effector sequence set retrieved from PHI-Base'
 )
 ```
+
 ```{r, oomefftable}
 apa_table(
   readr::read_tsv("tables/oomycete_effector_count.tab"),
@@ -168,6 +186,35 @@ apa_table(
   kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7) 
 
 ```
+
+```{r, modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C:LSTM-Embedding model; D:GRU-Embedding model"}
+knitr::include_graphics("figures/model_arch.png")
+```
+
+```{r, trainingprogress, fig.cap="Training trajectories showing Accuracy and Loss over 40 epochs for four model types on A: Bacterial sequence training set; B: Fungal sequence training set; C: Oomycete sequence training set"}
+knitr::include_graphics("figures/final_train_progress.png")
+```
+
+```{r, overallmodel}
+apa_table(
+  readr::read_tsv("tables/final_model_performance.tab"),
+  digits = 3,
+  align = 'c',
+  caption = 'Final performance of models in each taxon on the unseen, hold-out test data fraction of sequences.'
+)
+```
+
+```{r, confusionfinalmodels, fig.cap="Confusion matrices showing tendency of models to call false positive or false negative errors on the final test data. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
+
+knitr::include_graphics("figures/final_confusion.png")
+
+```
+
+```{r, modelcorrs, fig.cap="model correlations"}
+knitr::include_graphics("figures/drafts.png")
+```
+
+
 # Discussion
 
 
