@@ -92,15 +92,15 @@ The sequences collected were encoded using either one-hot encoding (CNN-LSTM bas
 
 ## Model Training
 
-We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-GRU, LSTM-Embedding,  GRU-Embedding. We trained each model using a basic random hyperparameter setting initialisation step followed by manual tuning.  All training was performed in R ^[Ruth, Version?], Tensorflow ^[Ruth, Version?], Keras ^[Ruth, Version?], Python ^[Ruth, Version?] on machines ^[Ruth, Machine types] with  Gb RAM ^[Ruth, Amounts?].  
+We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-GRU, LSTM-Embedding,  GRU-Embedding. We trained each model using a basic random hyperparameter setting initialisation step followed by All training was performed in R 3.5.3, Tensorflow 1.12.0, Keras 2.2.4, Python 3.6.9 on a MacBook Pro (Retina, 13-inch, Early 2013) with an Intel Core i7-3450M (3.00GHz) processor and 8 GB (1600 MHz DDR3) of RAM.  
 
 ### Hyperparameter Scans
 
-We performed a random search of hyperparameter effects by selecting ^[Ruth, how many? The report says 50, but it isn't clear whether this is 50 from 100 possible, or 50 from 50 possible - when you write something you need to keep in mind the question - 'How would my reader repeat this?' ] of all possible hyperparameters for each model type at random ^[Ruth, how is this done? Is there a script to reference?]. We applied five-fold cross validation at each combination and recorded model performance on the validation data set at each iteration. Code for this can be found ^[Ruth, where?]. 
+We performed a random search of hyperparameter effects by selecting 50 of all possible hyperparameters depending on each model type at random. The total of possible hyperparameter combination for each model can be found in Table \@ref(tab:possiblecombination). Additionally, the detail list of hyperparamaters that were fixed and tuned can be found in Table \@ref(tab:fixedhyperparam) and \@ref(tab:tunedhyperparam), respectively. We applied five-fold cross validation at each combination and recorded model performance on the validation data at each iteration. Code for this can be found in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts). Final selected hyperparameter settings for models in each species group can be seen in Table \@ref(tab:hyperparam).  
 
 ### Fine tuning
 
-With best performing models from hyperparameter scans we carried out a process of fine tuning manually to ensure that models did not over- or underfit data and were trained to be as general as possible. We loaded best performing models and assessed changes in selected parameters as described in Results to produce final models ^[Ruth, did you use anything like tensorboard or just R to manually tune the models?]. Once each model was tuned accordingly using the training and test sets, final classification testing and estimation of accuracy was done with the held-out validation set that the model had not seen until this point. The final models were saved into HDF5 objects and stored in the repository at [link](link) ^[Ruth, link please!]
+With best performing models from hyperparameter scans we carried out a process of fine tuning manually to ensure that models did not over- or underfit data and were trained to be as general as possible. We loaded best performing models and assessed changes in selected parameters as described in Results to produce final models. These processes were performed manually using Python scripts that can be found in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts). The results were visualised using R and the codes are stored in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/r-scripts/model-scripts/multi-class/secreted_data](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/r-scripts/model-scripts/multi-class/secreted_data). Once each model was tuned accordingly using the training and test sets, final classification testing and estimation of accuracy was done with the held-out validation set that the model had not seen until this point. The final models were saved into HDF5 objects and stored in the repository at [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/final_model_hdf5](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/final_model_hdf5).
 
 
 ## Procedure
@@ -176,6 +176,33 @@ apa_table(
 )
 ```
 
+```{r, possiblecombination}
+apa_table(
+  readr::read_tsv("tables/possible_combination_each_model.tab"),
+  digits = 0,
+  align = 'c',
+  caption = 'List of possible combination of hyperparamaters setting for each model'
+)
+```
+
+```{r, fixedhyperparam}
+apa_table(
+  readr::read_tsv("tables/fixed_hyperparam.tab"),
+  digits = 0,
+  align = 'c',
+  caption = 'Hyperparameters fixed in automatic scanning of hyperparameter space for each model'
+)
+```
+
+```{r, tunedhyperparam}
+apa_table(
+  readr::read_tsv("tables/tuned_hyperparam.tab"),
+  digits = 0,
+  align = 'c',
+  caption = 'Hyperparameters tuned in automatic scanning of hyperparameter space for each model'
+)
+```
+
 ```{r, hyperparam }
  readr::read_tsv("tables/hyperparamscan_info.tab") %>% 
   knitr::kable( "latex", longtable = T, booktabs = T,
@@ -186,6 +213,7 @@ apa_table(
   kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7) 
 
 ```
+
 
 ```{r, modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C:LSTM-Embedding model; D:GRU-Embedding model"}
 knitr::include_graphics("figures/model_arch.png")
@@ -213,6 +241,7 @@ knitr::include_graphics("figures/final_confusion.png")
 ```{r, modelcorrs, fig.cap="model correlations"}
 knitr::include_graphics("figures/drafts.png")
 ```
+
 
 
 # Discussion

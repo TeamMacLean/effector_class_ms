@@ -1,0 +1,5 @@
+Model	Fixed hyperparamaters
+CNN-LSTM	strides, padding, activation_convolution, activation_LSTM, epochs
+CNN-GRU	kernel_size, opt_dropout, opt_dropout_recurrent, opt_go_backwards, epochs
+LSTM Embedding	opt_dropout_recurrent, epochs
+GRU Embedding	opt_dropout, opt_dropout_recurrent, epochs

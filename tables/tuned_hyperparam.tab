@@ -1,0 +1,26 @@
+Model	Tuned hyperpramaters
+CNN-LSTM	filters
+CNN-LSTM	filters_LSTM
+CNN-LSTM	optimizers
+CNN-LSTM	number_hidden_units
+CNN-LSTM	batch_size
+CNN-GRU	filter_conv
+CNN-GRU	maxpool_size
+CNN-GRU	activation_conv
+CNN-GRU	gru_hidden_units
+CNN-GRU	reg_rate
+CNN-GRU	optimizers
+CNN-GRU	batch_size
+LSTM Embedding	outputdim
+LSTM Embedding	lstm_hidden_units
+LSTM Embedding	opt_dropout
+LSTM Embedding	opt_go_backwards
+LSTM Embedding	reg_rate
+LSTM Embedding	optimizers
+LSTM Embedding	batch_size
+GRU Embedding	outputdim
+GRU Embedding	gru_hidden_units
+GRU Embedding	opt_go_backwards
+GRU Embedding	reg_rate
+GRU Embedding	optimizers
+GRU Embedding	batch_size
