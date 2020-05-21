@@ -63,6 +63,20 @@ set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 ```
 
+# Introduction
+
+Phytopathogens are a major threat to global crop production.  The fungal phytopathogen _Magnoporthe oryzae_ that causes cereal blast is responsible for around 30% of rice production loss and has now emerged as a pandemic problem on wheat [@Nalley:2016jp] The oomycete _Phytophthora infestans_ causes losses of ~6 billion USD to potato production, annually [@haas2009genome]. The bacterium _Ralstonia solanacearum_ has a wide host range and can cause loses of over 30% in potato, banana and groundnut [@Yuliar:2015hp]. The incidences of crop disease are increasing, global climate change and agricultural practice are expanding the geographical range of pathogens and upping the stakes in the evolutionary arms race.  Effector proteins are the shock troops of infection, manipulating the host at the infection interface to the pathogens advantage. Identifying and characterising a pathogen's effector content is a critical first step in understanding diseases and developing resistance,  but effectors are **notoriously difficult to characterise from sequence data**. In most phyla they have only a few easily determined sequence characteristics (some in fungi are cysteine rich or have a MAX motif, some in oomycetes have the RXLR motif or WY fold)  but in many cases no sequence identifiers are known [@Franceschetti:2017gc]. Characterising effectors requires painstaking molecular experimental work and genome-scale approaches have relied on complex computational pipelines with in-built _a priori_ assumptions about what might constitute an effector sequence in the absence of sequence features known to group them [@Sperschneider:2015kb]. To understand infection processes, to provide genome-level understanding of the functions of this important class of genes and to develop future disease resisting crop varieties there is a critical need to identify effectors computationally from genome and protein sequence data.
+
+Deep learning models can uncover cryptic patterns in data. We believe such models can be trained to identify effectors directly from sequence as others have shown it is possible to classify other eukaryote and bacterial nuclear proteins [@Savojardo:2017eq]. In doing so these models encode information about the features it is using to classify that can be extracted to reveal novel sequence features that current techniques cannot. Deep learning models are distinct from other machine learning processes in that pre-selection of important features is far less critical and the models can learn these features unsupervised from training data [@Jurtz:2017cr]. This property removes the need to know which properties of a data set must be examined before data collection begins. 
+
+Convolutional neural networks (CNNs) ...
+
+Recent work by Sperschneider et al [@Sperschneider:2018gc] developed two ensemble-based machine learning models that could identify effectors and predict localisation with > 70% accuracy.  The work shows clearly that there are unknown patterns in the sequence data that a deep learning method could use to classify. 
+
+Here we use combinations of Convolutional Neural Networks (CNNs) that do not rely so heavily on _a priori_ feature selection - only a well annotated data set,  and that can extract novel features of the sequence in an unbiased, more unsupervised manner.  
+
+Deep learning approaches require positive and negative examples from which to learn - here a list of sequences annotated as effector or not. The larger and more accurate the list the more sensitivity a model can obtain. It is critical that training examples are experimentally verified effectors. Much of the effector annotation in public genomics databases is from computational predictions of genomics and therefore unverified hypothetical effectors. A good source of experimentally verified data is in the Molecular Plant Microbe Interactions (MPMI) literature.  The widest ranging manual curation of MPMI papers is being performed as part of the PHI-Base [@Urban:2017gp] database strategy.
+
 
 
 # Methods
@@ -102,12 +116,56 @@ We performed a random search of hyperparameter effects by selecting 50 of all po
 
 With best performing models from hyperparameter scans we carried out a process of fine tuning manually to ensure that models did not over- or underfit data and were trained to be as general as possible. We loaded best performing models and assessed changes in selected parameters as described in Results to produce final models. These processes were performed manually using Python scripts that can be found in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts). The results were visualised using R and the codes are stored in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/r-scripts/model-scripts/multi-class/secreted_data](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/r-scripts/model-scripts/multi-class/secreted_data). Once each model was tuned accordingly using the training and test sets, final classification testing and estimation of accuracy was done with the held-out validation set that the model had not seen until this point. The final models were saved into HDF5 objects and stored in the repository at [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/final_model_hdf5](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/final_model_hdf5).
 
+### Model Classification Correlation
 
-## Procedure
+We calculated correlations between the classifications from best performing models on the hold-out test data set using Pearson's correlation co-efficient on the 1/0 classification vectors. 
 
-## Data analysis
-We used `r cite_r("r-references.bib")` for all our analyses.
+## Ensemble Functions
 
+We computed an aggregate classification using two different ensemble functions, weighted average and an overall majority option. 
+  
+Weighted average is computed as
+
+\begin{equation}
+\bar{y} = \frac{\sum_{i=1}^{n} w_i y_i}{\sum_{i=1}^{n} w_i} ,
+\end{equation}
+  
+where $w_i$ is the weight, $y_i$ is the prediction value of the $i^{th}$ model, and $n$ is the total number of model. In our case, we use the accuracy of each model as the average. 
+
+Overall majority is computed as
+  
+\begin{equation}
+\tilde{y} = argmax(x_1, x_2, ..., x_n) ,
+\end{equation}
+where 
+  
+\begin{equation}
+y =
+   \begin{cases}
+          1 & \text{for } \tilde{y} > 0.5 \\
+          0 & \text{for } \tilde{y} \leq 0.5
+  \end{cases}
+\end{equation}
+
+
+## Metrics
+
+We used the following calculations for different accuracy metrics in our evaluations, specifically: accuracy, sensitivity, specificity. $TP$, $TN$, $FP$, and $FN$ refer to the number of true positives, true negatives, false positives and false negatives, respectively. 
+
+Accuracy ($Acc$) is the ratio between correctly classified non-effectors and effectors and all samples:
+\begin{equation}
+  Acc = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+
+Sensitivity $Sn$ is the ratio between correctly predicted as effectors and all effectors:
+\begin{equation}
+  Sn = \frac{TP}{TP + FN}
+\end{equation}
+
+Specificity ($Sp$) is the ratio between correctly predicted as non-effectors and all non-effectors:
+\begin{equation}
+  Sp = \frac{TN}{TN + FP}
+\end{equation}
 
 # Results
 
@@ -128,13 +186,21 @@ We then manually ran and checked the accuracy and loss of the models on the trai
 
 We examined the tendency of the models to call false positives or false negatives preferentially by creating confusion matrices of the classifications relative to the ground truth on the hold-out test data.\@ref(fig:confusionfinalmodels) The bacterial sequence trained models in general showed high accuracy and only one or two miscalls with no error bias except for the GRU-Embedding model which called five from 38 effectors as non effectors. The fungal sequence trained models were less accurate overall and showed a small amount more bias, again in the GRU-Embedding model, which was biased towards calling effectors as non-effectors and the CNN-LSTM model which was slightly biased in the opposite direction, calling non-effectors as effectors. The oomycete models were again quite balanced but the GRU-Embedding model showed a quite conservative tendancy calling 12 out of 17 effectors as non-effectors whilst getting all 17 non-effectors correct. Overall the models are accurate and show little to no bias with the exception of the GRU-Embedding type. In oomycete sequences in particular and in this class of model across the different sequence types showed itself to tend to call real effectors as not of that class. 
 
-Correlations between the ^[Add correlation to methods] calls \@ref(fig:model_corrs)
+Classification correlations between the different model architectures were high and positive in the bacterial sequence trained model's calls, in the range 0.8 - 0.88, see Figure \@ref(fig:model_corrs). CNN-GRU and LSTM-Embedding showed identical prediction sets. We saw similar levels of correlation  in the CNN-LSTM, GRU-Embedding and CNN-GRU fungal sequence trained model, in the range 0.79 - 0.9; though there was a significantly lower range of correlations with the LSTM-Embedding which were in the range 0.36 - 0.51. The models trained on oomycete sequences all showed this lower range of correlations, in the range 0.3 - 0.65. The higher correlation across bacterial trained models is likely from a mixture of the larger training set size and a greater uniformity of the sequences themselves. For the fungal sequence trained models we can see that the LSTM-Embedding model does not perform as well as the others. The oomycete sequence trained models all show a lower range correlation reflecting the likely less uniform and smaller training set. It is clear that, particularly for the fungal and oomycete models, each architecture is capturing separate aspects of the sequences and classifying on those with slightly varying levels of success.  
 
 ## Ensemble Models
 
-## Ensemble Model Characteristics
+We examined the usefulness of combining the predictions of the different model architectures using an ensemble function that takes the vectors of classifications of each model architecture as input. We performed the classification of the hold-out test data set using the ensembled models and the results can be seen in Table \@ref(tab:ensembleresults). With the models trained in bacterial sequences we saw an increase in classification accuracy over the best model, up to 0.99 for both ensemble functions. However, with the fungal and oomycete models we saw decreases relative to the best single model in both cases due to the higher accuracy of the CNN-LSTM model being diluted by the combined inacuracy of the other model architectures. The 
+
+
+
 
 ## Comparison With Other Classification Software
+Given the accuracies of the above we selected the ensemble bacterial model and the CNN-LSTM fungal and oomycete models to evaluate the performance of our models against widely used effector identification software
+
+^[Ruth, can you confirm that this is accurate for the rest of the analysis - are these the combinations of models you are using: You will need to discuss this with me before we make any changes to this document]
+
+
 
 ## Convolution Heatmaps
 
@@ -214,6 +280,14 @@ apa_table(
 
 ```
 
+```{r, ensembleresults}
+apa_table(
+  readr::read_tsv("tables/ensemble_model_performance.tab"),
+  digits = 3,
+  align = 'c',
+  caption = 'Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences.'
+)
+```
 
 ```{r, modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C:LSTM-Embedding model; D:GRU-Embedding model"}
 knitr::include_graphics("figures/model_arch.png")
@@ -238,7 +312,7 @@ knitr::include_graphics("figures/final_confusion.png")
 
 ```
 
-```{r, modelcorrs, fig.cap="model correlations"}
+```{r, modelcorrs, fig.cap="Pearson correlations between classifications made by different models; A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
 knitr::include_graphics("figures/drafts.png")
 ```
 

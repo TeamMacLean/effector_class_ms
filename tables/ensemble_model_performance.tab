@@ -1,0 +1,7 @@
+Taxon	Combination	Weighted Average	Voting
+Bacteria	All	0.9868421	0.9868421
+Fungi	All	0.7894737	0.6578947
+Fungi	CNN-LSTM + CNN-GRU	0.8421053	0.7894737
+Fungi	CNN-LSTM + LSTM-Embedding	0.8421053	0.6842105
+Fungi	CNN-LSTM + GRU-Embedding	0.7631579	0.6578947
+Oomycete	All	0.6764706	0.7647059
