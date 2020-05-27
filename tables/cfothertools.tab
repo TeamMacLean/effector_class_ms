@@ -1,0 +1,19 @@
+Metric	Classifier	Group	Score
+Accuracy	Ensemble Weighted	Bacteria	0.987
+Accuracy	Ensemble Voting	Bacteria	0.987
+Accuracy	Deep T3	Bacteria	0.868
+Accuracy	Effective T3	Bacteria	0.829
+F1 Score	Ensemble Weighted	Bacteria	0.987
+F1 Score	Ensemble Voting	Bacteria	0.987
+F1 Score	Deep T3	Bacteria	0.848
+F1 Score	Effective T3	Bacteria	0.794
+Accuracy	CNN-LSTM	Fungi	0.842
+Accuracy	EffectorP 1	Fungi	0.789
+Accuracy	EffectorP 2	Fungi	0.737
+F1 Score	CNN-LSTM	Fungi	0.857
+F1 Score	EffectorP 1	Fungi	0.778
+F1 Score	EffectorP 2	Fungi	0.706
+Accuracy	CNN-LSTM	Oomycete	0.824
+Accuracy	effectR	Oomycete	0.676
+F1 Score	CNN-LSTM	Oomycete	0.824
+F1 Score	effectR	Oomycete	0.56

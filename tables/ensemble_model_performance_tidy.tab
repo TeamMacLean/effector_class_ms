@@ -1,0 +1,13 @@
+Taxon	Combination	EnsembleFunction	Accuracy
+Bacteria	All	Ensemble Weighted	0.9868421
+Bacteria	All	Ensemble Voting 	0.9868421
+Fungi	All	Ensemble Weighted	0.7894737
+Fungi	All	Ensemble Voting 	0.6578947
+Fungi	CNN-LSTM + CNN-GRU	Ensemble Weighted	0.8421053
+Fungi	CNN-LSTM + LSTM-Embedding	Ensemble Voting 	0.7894737
+Fungi	CNN-LSTM + GRU-Embedding	Ensemble Weighted	0.8421053
+Fungi	CNN-LSTM + CNN-GRU	Ensemble Voting 	0.6842105
+Fungi	CNN-LSTM + LSTM-Embedding	Ensemble Weighted	0.7631579
+Fungi	CNN-LSTM + GRU-Embedding	Ensemble Voting 	0.6578947
+Oomycete	All	Ensemble Weighted	0.6764706
+Oomycete	All	Ensemble Voting 	0.7647059

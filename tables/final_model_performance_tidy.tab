@@ -1,0 +1,13 @@
+Taxon	Model	Accuracy
+Bacteria	CNN-LSTM	0.9605263
+Bacteria	CNN-GRU	0.9736842
+Bacteria	GRU-Embedding	0.9342105
+Bacteria	LSTM-Embedding	0.9736842
+Fungi	CNN-LSTM	0.8421053
+Fungi	CNN-GRU	0.7105263
+Fungi	GRU-Embedding	0.6052632
+Fungi	LSTM-Embedding	0.6578947
+Oomycete	CNN-LSTM	0.8235294
+Oomycete	CNN-GRU	0.7058824
+Oomycete	GRU-Embedding	0.6470588
+Oomycete	LSTM-Embedding	0.6764706
