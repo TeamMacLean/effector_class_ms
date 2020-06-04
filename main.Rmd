@@ -29,7 +29,18 @@ header-includes:
 
 ```{r setup, include = FALSE}
 library("papaja")
-library(magrittr)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+
+# Source plotting functions
+source("functions/plot_confusion_mat.R")
+source("functions/plot_confusion_matrices.R")
+source("functions/get_lower_corr_mat.R")
+source("functions/get_seqlogo.R")
+
+# ggplot2 global theme
+theme_set(theme_bw())
 ```
 
 ```{r analysis-preferences, echo=FALSE}
@@ -62,13 +73,17 @@ Sequence data were collected from the PHI-Base database version 4.8 [@phibase] b
 
 
 
-```{r, effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt", echo=FALSE}
+
+```{r, effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt", message = FALSE, echo=FALSE}
+
 knitr::include_graphics(
   "figures/flowchart_effectorsequence_collection.pdf",
 )
 ```
 
-```{r, noneffectorcollection, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists", echo=FALSE}
+
+```{r, noneffectorcollection, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists", message = FALSE, echo=FALSE}
+
 knitr::include_graphics(
   "figures/flowchart_secreted_noneffectorsequence_collection.pdf",
 )
@@ -188,9 +203,11 @@ An advantage of CNNs relative to other deep neural networks is their relative in
 
 To make the models useful for developers in their own analytic pipelines we have provided an R package that provides a useful interface to the code. The package is available from GitHub [https://ruthkr.github.io/deepredeff](https://ruthkr.github.io/deepredeff) 
 
-^[Ruth, will we do a shiny tool?]
+
+
 
 ```{r, effsummary, echo=FALSE,message = FALSE}
+
 apa_table(
   readr::read_tsv("tables/effectors_by_path_group.tab"),
   digits = 0,
@@ -199,15 +216,16 @@ apa_table(
 )
 ```
 
-```{r, modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C:LSTM-Embedding model; D:GRU-Embedding model", echo=FALSE}
+```{r, modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C:LSTM-Embedding model; D:GRU-Embedding model", message = FALSE, echo=FALSE}
 knitr::include_graphics("figures/model_arch.png")
 ```
 
-```{r, trainingprogress, fig.cap="Training trajectories showing Accuracy and Loss over 40 epochs for four model types on A: Bacterial sequence training set; B: Fungal sequence training set; C: Oomycete sequence training set", echo=FALSE}
+```{r, trainingprogress, fig.cap="Training trajectories showing Accuracy and Loss over 40 epochs for four model types on A: Bacterial sequence training set; B: Fungal sequence training set; C: Oomycete sequence training set", message = FALSE, echo=FALSE}
 knitr::include_graphics("figures/final_train_progress.png")
 ```
 
 ```{r, overallmodel, fig.cap="Final performance of models in each taxon on the unseen, hold-out test data fraction of sequences.", echo=FALSE, message=FALSE}
+
 # apa_table(
 #   readr::read_tsv("tables/final_model_performance.tab"),
 #   digits = 3,
@@ -218,21 +236,79 @@ readr::read_tsv("tables/final_model_performance_tidy.tab") %>%
   ggplot2::ggplot() +
   ggplot2::aes(Model, Accuracy) +
   ggplot2::geom_point(ggplot2::aes(colour = Accuracy)) +
-  ggplot2::facet_wrap(~ Taxon, scales = "free_x")
-
+  ggplot2::facet_wrap(~ Taxon, scales = "free_x") 
 ```
 
-```{r, confusionfinalmodels, fig.cap="Confusion matrices showing tendency of models to call false positive or false negative errors on the final test data. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", echo=FALSE}
 
-knitr::include_graphics("figures/final_confusion.png")
 
+
+```{r confusionmodelcorrs, fig.height = 8, fig.width = 8, fig.cap = "Confusion matrices showing tendency of models to call false positive or false negative errors on the final test data; and Pearson correlations between classifications made by different models. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", message = FALSE, echo=FALSE}
+# Load data
+bacteria_ensemble_results <- data.table::fread("data/raw/bacteria_pred_ens.csv", drop = "V1")
+
+bacteria_test_label <- data.table::fread("data/raw/bacteria_testing.csv") %>%
+  dplyr::select(label) %>%
+  mutate_each(list(as.factor))
+
+oomycete_ensemble_results <- data.table::fread("data/raw/oomycete_pred_ens.csv",drop = "V1")
+
+oomycete_test_label <- data.table::fread("data/raw/oomycete_testing.csv") %>%
+  dplyr::select(label) %>%
+  mutate_each(list(as.factor))
+
+fungi_ensemble_results <- data.table::fread("data/raw/fungi_pred_ens.csv", drop = "V1")
+
+fungi_test_label <- data.table::fread("data/raw/fungi_testing.csv") %>%
+  dplyr::select(label) %>%
+  mutate_each(list(as.factor))
+
+# Correlation plots
+corr_bacteria <- get_lower_corr_mat(bacteria_ensemble_results)
+corr_fungi <- get_lower_corr_mat(fungi_ensemble_results)
+corr_oomycete <- get_lower_corr_mat(oomycete_ensemble_results)
+
+# Confusion matrices
+conf_bacteria <- plot_confusion_matrices(
+  data = bacteria_ensemble_results,
+  true_label = bacteria_test_label,
+  model_list = c("cnn_lstm", "cnn_gru", "gru_emb", "lstm_emb"),#, "ensemble_weighted", "ensemble_voting")
+  fill_upper_limit = NA
+)
+
+conf_fungi <- plot_confusion_matrices(
+  data = fungi_ensemble_results,
+  true_label = fungi_test_label,
+  model_list = c("cnn_lstm", "cnn_gru", "gru_emb", "lstm_emb"),#, "ensemble_weighted", "ensemble_voting")
+  fill_upper_limit = NA
+)
+
+conf_oomycete <- plot_confusion_matrices(
+  data = oomycete_ensemble_results,
+  true_label = oomycete_test_label,
+  model_list = c("cnn_lstm", "cnn_gru", "gru_emb", "lstm_emb"),#, "ensemble_weighted", "ensemble_voting")
+  fill_upper_limit = NA
+)
+
+# Patchwork
+corr_patch <- (
+  corr_bacteria + conf_bacteria +
+    plot_layout(ncol = 2, widths = c(1,3), tag_level = "new")
+  ) /
+  (
+    corr_fungi + conf_fungi +
+      plot_layout(ncol = 2, widths = c(1,3), tag_level = "new")
+  ) /
+  (
+    corr_oomycete + conf_oomycete +
+      plot_layout(ncol = 2, widths = c(1,3), tag_level = "new")
+  )
+
+corr_patch +
+  plot_annotation(tag_levels = c("A", "1"), tag_sep = ".")
 ```
 
-```{r, modelcorrs, fig.cap="Pearson correlations between classifications made by different models; A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", echo=FALSE}
-knitr::include_graphics("figures/drafts.png")
-```
+```{r ensembleresults, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences.", message = FALSE, echo=FALSE}
 
-```{r, ensembleresults, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences.", message = FALSE, echo=FALSE}
 # apa_table(
 #   readr::read_tsv("tables/ensemble_model_performance.tab"),
 #   digits = 3,
@@ -243,10 +319,10 @@ readr::read_tsv("tables/ensemble_model_performance_tidy.tab") %>%
   ggplot2::aes(Combination, Accuracy) +
   ggplot2::geom_point(ggplot2::aes(colour = EnsembleFunction)) +
   ggplot2::facet_wrap(~ Taxon, scales = "free_x")
-
 ```
 
-```{r, vsothersmetrics, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", message = FALSE, echo=FALSE}
+
+```{r vsothersmetrics, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", message = FALSE, echo=FALSE}
 readr::read_tsv("tables/cfothertools.tab") %>% 
   ggplot2::ggplot() +
   ggplot2::aes(Classifier, Score) +
@@ -255,17 +331,177 @@ readr::read_tsv("tables/cfothertools.tab") %>%
 ```
 
 
-```{r, vsotherscfmat, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences.", message = FALSE, echo=FALSE}
-knitr::include_graphics("figures/cf_other_tools.png")
+
+
+
+```{r vsotherscfmat, fig.width=9, fig.height=8, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences."}
+# knitr::include_graphics("figures/cf_other_tools.png")
+
+bacteria_confusion_mat_df <- readr::read_csv("data/processed/bacteria_confusion_mat_df.csv")
+fungi_confusion_mat_df <- readr::read_csv("data/processed/fungi_confusion_mat_df.csv")
+oomycete_confusion_mat_df <- readr::read_csv("data/processed/oomycete_confusion_mat_df.csv")
+
+bacteria_conf <- plot_confusion_mat(
+  bacteria_confusion_mat_df, 
+  model_list = c("ensemble_weighted", "deepT3", "effectiveT3"), 
+  fill_upper_limit = 40
+)
+
+fungi_conf <- plot_confusion_mat(
+  fungi_confusion_mat_df, 
+  model_list = c("cnn_lstm", "effectorp_1", "effectorp_2"),  
+  fill_upper_limit = 40
+)
+
+oomycete_conf <- plot_confusion_mat(
+  oomycete_confusion_mat_df,
+  model_list = c("cnn_lstm", "effectR"),  
+  fill_upper_limit = 40
+)
+
+(bacteria_conf + ggplot2::theme(legend.position = "none") +
+    fungi_conf + 
+    oomycete_conf + ggplot2::theme(legend.position = "none")) +
+   plot_layout(ncol = 1, heights = c(1,1,1)) +
+   plot_annotation(tag_levels = "A")
 ```
 
-```{r, activations, fig.cap="GRAD-CAM activation profiles of CNN-LSTM models trained on when run with effector sequence data and sequence logo plots of sequence in the activation region within the dotted lines. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", echo=FALSE}
-knitr::include_graphics("figures/convolution_maps.png")
-```
+```{r activations, fig.height=6, fig.width=10, fig.cap="GRAD-CAM activation profiles of CNN-LSTM models trained on when run with effector sequence data and sequence logo plots of sequence in the activation region within the dotted lines. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
+# knitr::include_graphics("figures/convolution_maps_fixed.pdf")
 
+all_bacteria <- rbind(
+  data.table::fread("data/raw/bacteria_training.csv"),
+  data.table::fread("data/raw/bacteria_validation.csv"),
+  data.table::fread("data/raw/bacteria_testing.csv")
+)
+
+all_oomycete <- rbind(
+  data.table::fread("data/raw/oomycete_training.csv"),
+  data.table::fread("data/raw/oomycete_validation.csv"),
+  data.table::fread("data/raw/oomycete_testing.csv")
+)
+
+all_fungi <- rbind(
+  data.table::fread("data/raw/fungi_training.csv"),
+  data.table::fread("data/raw/fungi_validation.csv"),
+  data.table::fread("data/raw/fungi_testing.csv")
+)
+
+bacteria_heatmap <- data.table::fread("data/raw/bacteria_heatmap.csv")
+fungi_heatmap <- data.table::fread("data/raw/fungi_heatmap.csv")
+oomycete_heatmap <- data.table::fread("data/raw/oomycete_heatmap.csv")
+
+bacteria_eff_seqlogo <- get_seqlogo(
+  all_bacteria %>% dplyr::filter(label == 1), 
+  method_plot = "bits", 
+  start_pos = 25, 
+  end_pos = 50, 
+  break_size = 5
+)
+
+bacteria_non_eff_seqlogo <- get_seqlogo(
+  all_bacteria %>% dplyr::filter(label == 0), 
+  method_plot = "bits", 
+  start_pos = 25, 
+  end_pos = 50, 
+  break_size = 5
+)
+
+oomycete_eff_seqlogo <- get_seqlogo(
+  all_oomycete %>% dplyr::filter(label == 1), 
+  method_plot = "bits", 
+  start_pos = 15, 
+  end_pos = 40, 
+  break_size = 5
+)
+
+oomycete_non_eff_seqlogo <- get_seqlogo(
+  all_oomycete %>% dplyr::filter(label == 0), 
+  method_plot = "bits", 
+  start_pos = 15, 
+  end_pos = 40, 
+  break_size = 5
+)
+
+fungi_eff_seqlogo <- get_seqlogo(
+  all_fungi %>% dplyr::filter(label == 1), 
+  method_plot = "bits", 
+  start_pos = 35, 
+  end_pos = 80, 
+  break_size = 5
+)
+
+fungi_non_eff_seqlogo <- get_seqlogo(
+  all_fungi %>% dplyr::filter(label == 0), 
+  method_plot = "bits", 
+  start_pos = 35, 
+  end_pos = 80, 
+  break_size = 5
+)
+
+heatmap_linebar_bacteria <- bacteria_heatmap %>% 
+  dplyr::mutate(index = V1 + 1) %>% 
+  dplyr::filter(index <= 750) %>% 
+  dplyr::select(index, heatmap_bacteria_smooth) %>% 
+  ggplot(aes(x = index, y = heatmap_bacteria_smooth)) +
+  geom_line() +
+  geom_vline(xintercept = 25, linetype = 'dashed', color = "red") +
+  geom_vline(xintercept = 50, linetype = 'dashed',  color = "red") +
+  scale_x_continuous(breaks = seq(0, 750, 150)) +
+  labs(x = 'Position', y = "Value")
+
+heatmap_linebar_oomycete <- oomycete_heatmap %>% 
+  dplyr::mutate(index = V1 + 1) %>% 
+  dplyr::filter(index <= 750) %>% 
+  dplyr::select(index, heatmap_oomycete_smooth) %>% 
+  ggplot(aes(x = index, y = heatmap_oomycete_smooth)) +
+  geom_line() +
+  geom_vline(xintercept = 15, linetype = 'dashed', color = "blue") +
+  geom_vline(xintercept = 40, linetype = 'dashed', color = "blue") +
+  geom_vline(xintercept = 45, linetype = 'dashed', color = "red") +
+  geom_vline(xintercept = 70, linetype = 'dashed', color = "red") +
+  scale_x_continuous(breaks = seq(0, 750, 150)) +
+  labs(x = 'Position', y = "Value")
+
+heatmap_linebar_fungi <- fungi_heatmap %>%
+  dplyr::mutate(index = V1 + 1) %>% 
+  dplyr::filter(index <= 750) %>% 
+  dplyr::select(index, heatmap_fungi_smooth) %>% 
+  ggplot(aes(x = index, y = heatmap_fungi_smooth)) +
+  geom_line() +
+  geom_vline(xintercept = 35, linetype = 'dashed', color = "blue") +
+  geom_vline(xintercept = 80, linetype = 'dashed', color = "blue") +
+  scale_x_continuous(breaks = seq(0, 750, 150)) +
+  labs(x = 'Position', y = "Value")
+
+seqlogo_patch <- (
+  heatmap_linebar_bacteria + 
+    bacteria_eff_seqlogo + theme(legend.position = "none") +
+    bacteria_non_eff_seqlogo + theme(legend.position = "none") +
+    plot_layout(ncol = 3, widths = c(2,3,3), tag_level = "new")
+  ) /
+  (
+  heatmap_linebar_fungi + 
+    fungi_eff_seqlogo + theme(legend.position = "none") +
+    fungi_non_eff_seqlogo +
+      plot_layout(ncol = 3, widths = c(2,3,3), tag_level = "new")
+  ) /
+  (
+  heatmap_linebar_oomycete + 
+    oomycete_eff_seqlogo + theme(legend.position = "none") +
+    oomycete_non_eff_seqlogo + theme(legend.position = "none") +
+      plot_layout(ncol = 3, widths = c(2,3,3), tag_level = "new")
+  )
+
+seqlogo_patch +
+  plot_annotation(tag_levels = c("A", "1"), tag_sep = ".")
+```
 
 
 # Discussion
+
+
+
 
 
 \newpage
@@ -273,7 +509,9 @@ knitr::include_graphics("figures/convolution_maps.png")
 
 # Supplementary Tables
 
+
 ```{r, bacefftable, echo=FALSE, message = FALSE}
+
 apa_table(
   readr::read_tsv("tables/bacterial_effector_count.tab"),
   digits = 0,
@@ -282,7 +520,9 @@ apa_table(
 )
 ```
 
-```{r, fungiefftable, echo=FALSE, message = FALSE}
+
+```{r fungiefftable}
+
 apa_table(
   readr::read_tsv("tables/fungal_effector_count.tab"),
   digits = 0,
@@ -292,6 +532,7 @@ apa_table(
 ```
 
 ```{r, oomefftable, echo=FALSE,message = FALSE}
+
 apa_table(
   readr::read_tsv("tables/oomycete_effector_count.tab"),
   digits = 0,
@@ -301,6 +542,7 @@ apa_table(
 ```
 
 ```{r, possiblecombination, echo=FALSE,message = FALSE}
+
 apa_table(
   readr::read_tsv("tables/possible_combination_each_model.tab"),
   digits = 0,
@@ -309,7 +551,9 @@ apa_table(
 )
 ```
 
+
 ```{r, fixedhyperparam, echo=FALSE,message = FALSE}
+
 apa_table(
   readr::read_tsv("tables/fixed_hyperparam.tab"),
   digits = 0,
@@ -318,7 +562,9 @@ apa_table(
 )
 ```
 
+
 ```{r, tunedhyperparam, echo=FALSE,message = FALSE}
+
 apa_table(
   readr::read_tsv("tables/tuned_hyperparam.tab"),
   digits = 0,
@@ -327,7 +573,9 @@ apa_table(
 )
 ```
 
+
 ```{r, hyperparam, echo=FALSE,message = FALSE }
+
  readr::read_tsv("tables/hyperparamscan_info.tab") %>% 
   knitr::kable( "latex", longtable = T, booktabs = T,
            digits = 0,
