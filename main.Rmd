@@ -1,63 +1,38 @@
 ---
-title             : "Accurate plant pathogen effector protein classification _ab initio_ with **deepredeff**, an ensemble of convolutional neural networks."
-shorttitle        : "CNNs for classifying effector proteins"
-
-author: 
-  - name          : "Ruth Kristianingsih"
-    affiliation   : "1"
-    email         : "ruth.kristianingsih@tsl.ac.uk"
-  - name          : "Dan MacLean"
-    email         : "dan.maclean@tsl.ac.uk"
-    address       : "The Sainsbury Laboratory, University of East Anglia, Norwich, UK, NR4 7UH"
-    corresponding : yes    # Define only one corresponding author
-    affiliation   : "1"
-
-affiliation:
-  - id            : "1"
-    institution   : "The Sainsbury Laboratory"
-
-
-abstract: |
-  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
-  
-  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
-  
-  One sentence clearly stating the **general problem** being addressed by  this particular study.
-  
-  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
-  
-  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
-  
-  One or two sentences to put the results into a more **general context**.
-  
-  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
-  
-  <!-- https://tinyurl.com/ybremelq -->
-  
-  <!-- keywords          : "keywords" 
-  wordcount         : "X" -->
-
-bibliography      : ["r-references.bib"]
-
-floatsintext      : no
-figurelist        : no
-tablelist         : no
-footnotelist      : no
-linenumbers       : yes
-mask              : no
-draft             : no
-
-documentclass     : "apa6"
-classoption       : "man"
-output            : papaja::apa6_pdf
+title: "Accurate plant pathogen effector protein classification _ab initio_ with **deepredeff**, an ensemble of convolutional neural networks."
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  bookdown::pdf_document2:
+    citation_package: natbib
+    keep_tex: true
+    fig_caption: true
+    latex_engine: pdflatex
+    template: svm_latex.tex
+    toc: no
+fontsize: 12pt
+fontfamily: sans
+papersize: a4paper
+author:
+  - name: Ruth Kristianingsih, Dan MacLean
+  - affiliation: The Sainsbury Laboratory, University of East Anglia, Norwich Research Park, Norwich, UK, NR4 7JJ, dan.maclean@tsl.ac.uk
+abstract: "TBD."
+geometry: margin=1in
+biblio-style: apsr
+bibliography: "r-references.bib"
+graphics: yes
+header-includes:
+  - \usepackage{amsmath}
 ---
+
+
+
 
 ```{r setup, include = FALSE}
 library("papaja")
 library(magrittr)
 ```
 
-```{r analysis-preferences}
+```{r analysis-preferences, echo=FALSE}
 # Seed for random number generation
 set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
@@ -83,17 +58,17 @@ Deep learning approaches require positive and negative examples from which to le
 
 ## Sequence Data Collection
 
-Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data kindly prepared on request by the PHI-Base team, the file can be accessed at [https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in Figure \@ref(fig:effectorcollection) outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release 2019_05, using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [@yates_ensembl_2020] : specifically Ensembl Fungi, Protists and Bacteria manually using the BioMart tools [@smedley_biomart_2009]. Since the BioMart tool is not available on Ensembl Bacteria, we downloaded whole proteome protein sequnces from species matched to those from which the effector came using FTP. With these we used SignalP 3.0 [@dyrlov_bendtsen_improved_2004] in order to filter the secreted sequences and selected accordingly. ^[Ruth, what version of the code and what parameter settings did you use?] Redundant sequences were filtered using BLASTp [@camacho_blast_2009]. We achieved these steps using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd).
+Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data kindly prepared on request by the PHI-Base team, the file can be accessed at [https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in Figure \@ref(fig:effectorcollection) outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release 2019_05, using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [@yates2020] : specifically Ensembl Fungi, Protists and Bacteria manually using the BioMart tools [@smedley2009]. Since the BioMart tool is not available on Ensembl Bacteria, we downloaded whole proteome protein sequnces from species matched to those from which the effector came using FTP. With these we used SignalP 3.0 [@dyrlovbendtsen2004] in order to filter the secreted sequences and selected accordingly. ^[Ruth, what version of the code and what parameter settings did you use?] Redundant sequences were filtered using BLASTp [@camachoblast2009]. We achieved these steps using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd).
 
 
 
-```{r, effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt"}
+```{r, effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt", echo=FALSE}
 knitr::include_graphics(
   "figures/flowchart_effectorsequence_collection.pdf",
 )
 ```
 
-```{r, noneffectorcollection, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists"}
+```{r, noneffectorcollection, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists", echo=FALSE}
 knitr::include_graphics(
   "figures/flowchart_secreted_noneffectorsequence_collection.pdf",
 )
@@ -142,8 +117,8 @@ where
 \begin{equation}
 y =
    \begin{cases}
-          1 & \text{for } \tilde{y} > 0.5 \\
-          0 & \text{for } \tilde{y} \leq 0.5
+          1 & \mbox{for } \tilde{y} > 0.5 \\
+          0 & \mbox{for } \tilde{y} \leq 0.5
   \end{cases}
 \end{equation}
 
@@ -215,7 +190,7 @@ To make the models useful for developers in their own analytic pipelines we have
 
 ^[Ruth, will we do a shiny tool?]
 
-```{r, effsummary}
+```{r, effsummary, echo=FALSE,message = FALSE}
 apa_table(
   readr::read_tsv("tables/effectors_by_path_group.tab"),
   digits = 0,
@@ -224,15 +199,15 @@ apa_table(
 )
 ```
 
-```{r, modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C:LSTM-Embedding model; D:GRU-Embedding model"}
+```{r, modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C:LSTM-Embedding model; D:GRU-Embedding model", echo=FALSE}
 knitr::include_graphics("figures/model_arch.png")
 ```
 
-```{r, trainingprogress, fig.cap="Training trajectories showing Accuracy and Loss over 40 epochs for four model types on A: Bacterial sequence training set; B: Fungal sequence training set; C: Oomycete sequence training set"}
+```{r, trainingprogress, fig.cap="Training trajectories showing Accuracy and Loss over 40 epochs for four model types on A: Bacterial sequence training set; B: Fungal sequence training set; C: Oomycete sequence training set", echo=FALSE}
 knitr::include_graphics("figures/final_train_progress.png")
 ```
 
-```{r, overallmodel, fig.cap="Final performance of models in each taxon on the unseen, hold-out test data fraction of sequences."}
+```{r, overallmodel, fig.cap="Final performance of models in each taxon on the unseen, hold-out test data fraction of sequences.", echo=FALSE, message=FALSE}
 # apa_table(
 #   readr::read_tsv("tables/final_model_performance.tab"),
 #   digits = 3,
@@ -247,17 +222,17 @@ readr::read_tsv("tables/final_model_performance_tidy.tab") %>%
 
 ```
 
-```{r, confusionfinalmodels, fig.cap="Confusion matrices showing tendency of models to call false positive or false negative errors on the final test data. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
+```{r, confusionfinalmodels, fig.cap="Confusion matrices showing tendency of models to call false positive or false negative errors on the final test data. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", echo=FALSE}
 
 knitr::include_graphics("figures/final_confusion.png")
 
 ```
 
-```{r, modelcorrs, fig.cap="Pearson correlations between classifications made by different models; A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
+```{r, modelcorrs, fig.cap="Pearson correlations between classifications made by different models; A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", echo=FALSE}
 knitr::include_graphics("figures/drafts.png")
 ```
 
-```{r, ensembleresults, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences."}
+```{r, ensembleresults, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences.", message = FALSE, echo=FALSE}
 # apa_table(
 #   readr::read_tsv("tables/ensemble_model_performance.tab"),
 #   digits = 3,
@@ -271,7 +246,7 @@ readr::read_tsv("tables/ensemble_model_performance_tidy.tab") %>%
 
 ```
 
-```{r, vsothersmetrics, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software"}
+```{r, vsothersmetrics, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", message = FALSE, echo=FALSE}
 readr::read_tsv("tables/cfothertools.tab") %>% 
   ggplot2::ggplot() +
   ggplot2::aes(Classifier, Score) +
@@ -280,11 +255,11 @@ readr::read_tsv("tables/cfothertools.tab") %>%
 ```
 
 
-```{r, vsotherscfmat, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences."}
+```{r, vsotherscfmat, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences.", message = FALSE, echo=FALSE}
 knitr::include_graphics("figures/cf_other_tools.png")
 ```
 
-```{r, activations, fig.cap="GRAD-CAM activation profiles of CNN-LSTM models trained on when run with effector sequence data and sequence logo plots of sequence in the activation region within the dotted lines. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
+```{r, activations, fig.cap="GRAD-CAM activation profiles of CNN-LSTM models trained on when run with effector sequence data and sequence logo plots of sequence in the activation region within the dotted lines. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", echo=FALSE}
 knitr::include_graphics("figures/convolution_maps.png")
 ```
 
@@ -295,23 +270,10 @@ knitr::include_graphics("figures/convolution_maps.png")
 
 \newpage
 
-# References
-```{r create_r-references}
-r_refs(file = "r-references.bib")
-```
-
-\begingroup
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-
-<div id="refs" custom-style="Bibliography"></div>
-\endgroup
-
-\newpage
 
 # Supplementary Tables
 
-```{r, bacefftable}
+```{r, bacefftable, echo=FALSE, message = FALSE}
 apa_table(
   readr::read_tsv("tables/bacterial_effector_count.tab"),
   digits = 0,
@@ -320,7 +282,7 @@ apa_table(
 )
 ```
 
-```{r, fungiefftable}
+```{r, fungiefftable, echo=FALSE, message = FALSE}
 apa_table(
   readr::read_tsv("tables/fungal_effector_count.tab"),
   digits = 0,
@@ -329,7 +291,7 @@ apa_table(
 )
 ```
 
-```{r, oomefftable}
+```{r, oomefftable, echo=FALSE,message = FALSE}
 apa_table(
   readr::read_tsv("tables/oomycete_effector_count.tab"),
   digits = 0,
@@ -338,7 +300,7 @@ apa_table(
 )
 ```
 
-```{r, possiblecombination}
+```{r, possiblecombination, echo=FALSE,message = FALSE}
 apa_table(
   readr::read_tsv("tables/possible_combination_each_model.tab"),
   digits = 0,
@@ -347,7 +309,7 @@ apa_table(
 )
 ```
 
-```{r, fixedhyperparam}
+```{r, fixedhyperparam, echo=FALSE,message = FALSE}
 apa_table(
   readr::read_tsv("tables/fixed_hyperparam.tab"),
   digits = 0,
@@ -356,7 +318,7 @@ apa_table(
 )
 ```
 
-```{r, tunedhyperparam}
+```{r, tunedhyperparam, echo=FALSE,message = FALSE}
 apa_table(
   readr::read_tsv("tables/tuned_hyperparam.tab"),
   digits = 0,
@@ -365,7 +327,7 @@ apa_table(
 )
 ```
 
-```{r, hyperparam }
+```{r, hyperparam, echo=FALSE,message = FALSE }
  readr::read_tsv("tables/hyperparamscan_info.tab") %>% 
   knitr::kable( "latex", longtable = T, booktabs = T,
            digits = 0,
