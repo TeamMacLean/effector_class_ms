@@ -9,5 +9,5 @@
 /*.pdf
 main.log
 *.pptx
-main_files
+main_files/*
 figures/draft.pptx
