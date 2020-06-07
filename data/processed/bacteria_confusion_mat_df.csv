@@ -1,13 +1,13 @@
 true_label,model,Prediction,Freq
 1,ensemble_weighted,1,37
 0,ensemble_weighted,1,0
-1,deepT3,1,28
+1,deepT3,1,27
 0,deepT3,1,0
-1,effectiveT3,1,25
+1,effectiveT3,1,18
 0,effectiveT3,1,0
 1,ensemble_weighted,0,1
 0,ensemble_weighted,0,38
-1,deepT3,0,10
+1,deepT3,0,11
 0,deepT3,0,38
-1,effectiveT3,0,13
+1,effectiveT3,0,20
 0,effectiveT3,0,38
