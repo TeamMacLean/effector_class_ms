@@ -1,0 +1,17 @@
+model,.metric,.estimator,.estimate,groups
+ensemble_weighted,Accuracy,binary,0.9868421052631579,Bacteria
+deepT3,Accuracy,binary,0.8552631578947368,Bacteria
+effectiveT3,Accuracy,binary,0.7368421052631579,Bacteria
+ensemble_weighted,F1 Score,binary,0.9866666666666666,Bacteria
+deepT3,F1 Score,binary,0.8307692307692308,Bacteria
+effectiveT3,F1 Score,binary,0.6428571428571429,Bacteria
+cnn_lstm,Accuracy,binary,0.8421052631578947,Fungi
+effectorp_1,Accuracy,binary,0.7105263157894737,Fungi
+effectorp_2,Accuracy,binary,0.6842105263157895,Fungi
+cnn_lstm,F1 Score,binary,0.8571428571428571,Fungi
+effectorp_1,F1 Score,binary,0.7317073170731707,Fungi
+effectorp_2,F1 Score,binary,0.6666666666666667,Fungi
+cnn_lstm,Accuracy,binary,0.8235294117647058,Oomycete
+effectR,Accuracy,binary,0.6176470588235294,Oomycete
+cnn_lstm,F1 Score,binary,0.8235294117647058,Oomycete
+effectR,F1 Score,binary,0.38095238095238093,Oomycete
