@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 .DS_Store
-*.tex
 *.ttt
 *.fff
 /*.pdf
@@ -11,3 +10,4 @@ main.log
 *.pptx
 main_files/
 figures/draft.pptx
+main.tex

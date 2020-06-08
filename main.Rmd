@@ -9,6 +9,8 @@ output:
     latex_engine: pdflatex
     template: svm_latex.tex
     toc: no
+    includes:
+      in_header: preamble.tex
 fontsize: 12pt
 fontfamily: sans
 papersize: a4paper
@@ -72,19 +74,7 @@ Here we use combinations of CNNs that do not rely on _a priori_ feature selectio
 
 ## Sequence Data Collection
 
-Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data kindly prepared on request by the PHI-Base team, the file can be accessed at [https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in Figure \@ref(fig:effectorcollection) outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release 2019_05, using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [@yates2020] : specifically Ensembl Fungi, Protists and Bacteria manually using the BioMart tools [@smedleybiomart2009]. Since the BioMart tool is not available on Ensembl Bacteria, we downloaded whole proteome protein sequnces from species matched to those from which the effector came using FTP. With these we used SignalP 3.0 [@dyrlovbendtsen2004] in order to filter the secreted sequences and selected accordingly. We used default paramaters from SignalP, except the type of organism group which is `euk` for both fungi and oomycete sequences, and `gram-` or `gram+` for bacteria sequences. Redundant sequences were filtered using BLASTp [@camachoblast2009]. We achieved these steps using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd).
-
-```{r effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt"}
-knitr::include_graphics(
-  "figures/flowchart_effectorsequence_collection.pdf"
-)
-```
-
-```{r noneffectorcollection, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists"}
-knitr::include_graphics(
-  "figures/flowchart_secreted_noneffectorsequence_collection.pdf"
-)
-```
+Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data prepared on request by the PHI-Base team, the file can be accessed at [https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in Figure \@ref(fig:effectorcollection) outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release 2019_05, using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [@yates2020] : specifically Ensembl Fungi, Protists and Bacteria manually using the BioMart tools [@smedleybiomart2009]. Since the BioMart tool is not available on Ensembl Bacteria, we downloaded whole proteome protein sequnces from species matched to those from which the effector came using FTP. With these we used SignalP 3.0 [@dyrlovbendtsen2004] in order to filter the secreted sequences and selected accordingly. We used default paramaters from SignalP, except the type of organism group which is `euk` for both fungi and oomycete sequences, and `gram-` or `gram+` for bacteria sequences. Redundant sequences were filtered using BLASTp [@camachoblast2009]. We achieved these steps using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd).
 
 ## Encoding and Subsetting Sequences
 
@@ -213,6 +203,17 @@ To make the models useful for developers in their own analytic pipelines we have
 #########################################################
 
 -->
+```{r effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt"}
+knitr::include_graphics(
+  "figures/flowchart_effectorsequence_collection.pdf"
+)
+```
+
+```{r noneffectorcollection, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists"}
+knitr::include_graphics(
+  "figures/flowchart_secreted_noneffectorsequence_collection.pdf"
+)
+```
 
 
 ```{r, effsummary}
@@ -605,7 +606,7 @@ apa_table(
 
 -->
 
-
+\beginsupplement
 ```{r, bacefftable, echo=FALSE, message = FALSE}
 
 apa_table(
@@ -661,7 +662,7 @@ apa_table(
 )
 ```
 
-```{r hyperparam}
+```{r, hyperparam}
  readr::read_tsv("tables/hyperparamscan_info.tab") %>%
   knitr::kable( "latex", longtable = T, booktabs = T,
            digits = 0,
