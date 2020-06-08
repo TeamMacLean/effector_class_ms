@@ -166,55 +166,17 @@ The performance of the trained classifiers is dependent on the quality of the in
 Sequences for non-effector, secreted proteins were collected using a similar pipeline. Randomly selected proteins from each species carrying secretion signals were extracted from Ensembl databases using the BioMart tool. For each species noted in Tables \@ref(tab:bacefftable), \@ref(tab:fungiefftable) and \@ref(tab:oomefftable) we collected an identical number of non-effector, secreted proteins to that collected in the effector set from either the same strain or species. This gave us a balanced data set of effector proteins as positive learning examples and non-effector secreted proteins as negative learning examples. Figure \@ref(fig:noneffectorcollection) summarises the process of building the non-effector set, and the full set of sequences and IDs retrieved can be seen in the following data file [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/secreted_data](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/data/secreted_data).
 
 
-## Model Selection and Training
-
-We selected four base architectures on which to build models for learning. Two of these contained Convolutional Neural Network (CNN) layers followed by either a Long Short Term Memory Layer (LSTM) or a Gated Recurrent Unit (GRU), two contained an Embedding Layer followed by the LSTM or GRU. All models had fully-connected dense layers after this. See Figure \@ref(fig:modelarch). Hyperparameter values for the models were identified using a random search as described in methods. Model variants within the hyperparameter search were assessed by comparing accuracy values on the development validation fraction of the training data. For each model type and taxon training data combination we selected the hyperparameter set giving highest accuracy on the validation set for manual tuning.  Final selected hyperparameter settings for models in each taxon can be seen in Table \@ref(tab:hyperparam), a total of twelve models were produced, one for each taxon and model combination. The values of accuracy and loss of each model produced are shown in Table \@ref(tab:acclossfinal).
-
-We then manually ran and checked the accuracy and loss of the models on the training and validation sets to investigate instances of overfitting and assess generality. Smaller models are less likely to overfit data, so we investigated the effect of regularization rate, filter count and kernel size on the progress and accuracy of the model as we reduced the size. We found that by reducing the number of kernels on all models from 2 to 1 and the number of filters reduced from 32 to 16 we removed apparent overfitting and retained high accuracy, with training completing in 40 epochs. Final training progressions for each model in each taxon can be seen in Figure \@ref(fig:trainingprogress). We tested the finalised models on the hold-out test fraction of the data that had not been previously seen, for the four bacterial sequence trained models we had accuracies in the range 93.4  to 97.4, for the four fungal models we observed accuracy in the range  60.5 to 84.2 and for the four oomycete models we saw accuracy from 64.7 to 82.3, reported in Fig \@ref(fig:overallmodel). All the models we generated had high statistical power and can accurately and reliably classify effectors from other secreted proteins in that taxon.
-
-## Model Characteristics
-
-We examined the tendency of the models to call false positives or false negatives preferentially by creating confusion matrices of the classifications relative to the ground truth on the hold-out test data. The bacterial sequence trained models in general showed high accuracy and only one or two miscalls with no error bias except for the GRU-Embedding model which called five from 38 effectors as non effectors. The fungal sequence trained models were less accurate overall and showed a small amount more bias, again in the GRU-Embedding model, which was biased towards calling effectors as non-effectors and the CNN-LSTM model which was slightly biased in the opposite direction, calling non-effectors as effectors. The oomycete models were again quite balanced but the GRU-Embedding model showed a quite conservative tendancy calling 12 out of 17 effectors as non-effectors whilst getting all 17 non-effectors correct. Overall the models are accurate and show little to no bias toward false positive or false negatives, with the exception of the GRU-Embedding type. In oomycete sequences in particular and in this class of model across the different sequence types showed itself to tend to call real effectors as not of that class.
-
-Classification correlations between the different model architectures were high and positive in the bacterial sequence trained model's calls, in the range 0.8 to 0.88, see Figure \@ref(fig:confusionmodelcorrs). CNN-GRU and LSTM-Embedding showed identical prediction sets. We saw similar levels of correlation  in the CNN-LSTM, GRU-Embedding and CNN-GRU fungal sequence trained model, in the range 0.79 to 0.9 ; though there was a significantly lower range of correlations with the LSTM-Embedding which were in the range 0.36 to 0.51. The models trained on oomycete sequences all showed this lower range of correlations, in the range 0.30 to 0.65. The higher correlation across bacterial trained models is likely from a mixture of the larger training set size and a greater uniformity of the sequences themselves. For the fungal sequence trained models we can see that the LSTM-Embedding model does not perform as well as the others. The oomycete sequence trained models all show a lower range correlation reflecting the likely less uniform and smaller training set. It is clear that, particularly for the fungal and oomycete models, each architecture is capturing separate aspects of the sequences and classifying on those with slightly varying levels of success.
-
-## Ensemble Models
-
-We examined the usefulness of combining the predictions of the different model architectures using an ensemble function that takes the vectors of classifications of each model architecture as input. We performed the classification of the hold-out test data set using the ensembled models and the results can be seen in Figure \@ref(fig:ensembleresults). With the models trained in bacterial sequences we saw an increase in classification accuracy over the best model, up to 0.99 for both ensemble functions. However, with the fungal and oomycete models we saw decreases relative to the best single model in both cases due to the higher accuracy of the CNN-LSTM model being diluted by the combined inacuracy of the other model architectures. Examining the overlaps in classifications between the CNN-LSTM and CNN-GRU/LSTM-Embedding respectively showed that the two lesser performing models were not simply predicting subsets of the CNN-LSTM model, in both cases the lesser models were able to identify three effectors correctly that were missed by the generally stronger models. This indicates that the weaker models may be classifying on some patterns missed by the CNN-LSTM model.
-
-## Comparison With Other Classification Software
-
-Given the accuracies of the above we selected the ensemble bacterial model and the CNN-LSTM fungal and oomycete models to evaluate the performance of our models against widely used effector identification software. We compared against predictions from the bacterial effector prediction programs deepT3 [@deept3] and effectiveT3 [@effectivet3], the fungal effector prediction programs EffectorP 1 and 2 [@effectorp, @effectorp2] and the oomycete effector predictor effectR [@effectR]. Each comparison was carried out using the respective hold-out test sequence set for each taxon. For all taxon we saw greater Accuracy and F1 scores from our models than the established software, as shown in Figure \@ref(fig:vsothersmetrics). This was particularly marked in the F1 score, which incorporates a measure of the incorrect calls. Absoloute improvements were up to 15 %  in bacterial sequences, 15 % in fungal sequences and 20 %  in the oomycete sequences. The confusion matrices in Figure \@ref(fig:vsotherscfmat) show that accuracy and F1 score was compromised in all the established tools by the tendency of them all to misclassify true effectors as not effectors.  All the established software classifiers we tested show lower sensitivity than the models we have developed here.
-
-## Convolution Heatmaps
-
-An advantage of CNNs relative to other deep neural networks is their relative interpretability. A CNN can be analysed to activation maps which  highlight the regions of the input to which the CNN is most strongly using to classify. To examine the responses of the model, we ran the effector sequence ^[Ruth, can you confirm that this is what you did, we want the effector activations only, not the whole set, or at least the effector activations in one panel and the non-effectors in another] data sets back through the CNN-LSTM models for each taxon and extracted the network activations using the GRAD-CAM method. The profiles were smoothed using FFT and examined \@ref(fig:activations). All the models showed a peak of activation at the N-terminus of the sequences, coincident with expected positions of secretion signals. The fungal sequences created a single broad activation region with a width of 50 to 100 amino acids while the bacterial and oomycete sequences create a some smaller grouped peaks in a broader region which were each around 20 amino acids. We examined further the sequences under the largest peaks, specifically for bacterial sequences we used amino acids 25 to 50, for fungal sequences we used amino acids 35 to 80 and for oomycete sequences we used amino acids 15 to 40. Compositional analysis of the sequence under the peaks showed no apparent primary sequence conservation or motifs as shown in the logo plots in Fig \@ref(fig:activations) even within a taxon and data set. Enrichment analysis of different amino acid categories showed a statistically significant ($p < 0.05$) increase of hydrophobic amino acids in the effector sequences of bacteria and oomycete sequence regions relative to the combined effector and non effector set \@ref(tab:phyperaatype) and an enrichment of polar amino acids in oomycete sequences, though no enrichment of any type was found in the fungal effectors. These properties are consistent with the secreted role of known effector proteins. 
-
-## Software Implementation
-
-To make the models useful for developers in their own analytic pipelines we have provided an R package that provides a useful interface to the models. The package and installation instructions are available from GitHub [https://ruthkr.github.io/deepredeff](https://ruthkr.github.io/deepredeff) 
-
-<!-- 
-
-#########################################################
-## Start code fragments
-##
-##
-#########################################################
-
--->
-```{r effectorcollection, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt"}
+```{r effectorcollection, fig.width=10, fig.height=10, out.width='50%', fig.align='center', fig.cap="Workflow diagram for collection of effector sequences from the PHI-Base database annotation and cross reference to UniProt"}
 knitr::include_graphics(
   "figures/flowchart_effectorsequence_collection.pdf"
 )
 ```
 
-```{r noneffectorcollection, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists"}
+```{r noneffectorcollection, fig.width=10, fig.height=10, fig.cap="Workflow diagram for collection of secreted non-effector sequences from Ensembl Bacteria, Fungi, and Protists"}
 knitr::include_graphics(
   "figures/flowchart_secreted_noneffectorsequence_collection.pdf"
 )
 ```
-
 
 ```{r, effsummary}
 apa_table(
@@ -225,9 +187,27 @@ apa_table(
 )
 ```
 
-```{r modelarch, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C: LSTM-Embedding model; D: GRU-Embedding model"}
+
+## Model Selection and Training
+
+We selected four base architectures on which to build models for learning. Two of these contained Convolutional Neural Network (CNN) layers followed by either a Long Short Term Memory Layer (LSTM) or a Gated Recurrent Unit (GRU), two contained an Embedding Layer followed by the LSTM or GRU. All models had fully-connected dense layers after this. See Figure \@ref(fig:modelarch). Hyperparameter values for the models were identified using a random search as described in methods. Model variants within the hyperparameter search were assessed by comparing accuracy values on the development validation fraction of the training data. For each model type and taxon training data combination we selected the hyperparameter set giving highest accuracy on the validation set for manual tuning.  Final selected hyperparameter settings for models in each taxon can be seen in Table \@ref(tab:hyperparam), a total of twelve models were produced, one for each taxon and model combination. The values of accuracy and loss of each model produced are shown in Table \@ref(tab:acclossfinal).
+
+```{r modelarch, fig.width=10, fig.height=10, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C: LSTM-Embedding model; D: GRU-Embedding model"}
 knitr::include_graphics("figures/model_arch.pdf")
+
 ```
+
+```{r acclossfinal}
+ readr::read_tsv("tables/acc_loss_final.tab") %>%
+  knitr::kable( "latex", longtable = T, booktabs = T,
+           digits = 4,
+  align = 'c',
+  caption = 'Accuracy and loss values from best performing parameters values for each model'
+         ) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
+```
+
+We then manually ran and checked the accuracy and loss of the models on the training and validation sets to investigate instances of overfitting and assess generality. Smaller models are less likely to overfit data, so we investigated the effect of regularization rate, filter count and kernel size on the progress and accuracy of the model as we reduced the size. We found that by reducing the number of kernels on all models from 2 to 1 and the number of filters reduced from 32 to 16 we removed apparent overfitting and retained high accuracy, with training completing in 40 epochs. Final training progressions for each model in each taxon can be seen in Figure \@ref(fig:trainingprogress). We tested the finalised models on the hold-out test fraction of the data that had not been previously seen, for the four bacterial sequence trained models we had accuracies in the range 93.4  to 97.4, for the four fungal models we observed accuracy in the range  60.5 to 84.2 and for the four oomycete models we saw accuracy from 64.7 to 82.3, reported in Fig \@ref(fig:overallmodel). All the models we generated had high statistical power and can accurately and reliably classify effectors from other secreted proteins in that taxon.
 
 ```{r trainingprogress, fig.height= 10, fig.width= 10, fig.cap="Training trajectories showing Accuracy and Loss over 40 epochs for four model types on A: Bacterial sequence training set; B: Fungal sequence training set; C: Oomycete sequence training set"}
 # knitr::include_graphics("figures/final_train_progress.png")
@@ -280,6 +260,12 @@ readr::read_tsv("tables/final_model_performance_tidy.tab") %>%
   ggplot2::facet_wrap(~ Taxon, scales = "free_x") +
   ggplot2::theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+## Model Characteristics
+
+We examined the tendency of the models to call false positives or false negatives preferentially by creating confusion matrices of the classifications relative to the ground truth on the hold-out test data. The bacterial sequence trained models in general showed high accuracy and only one or two miscalls with no error bias except for the GRU-Embedding model which called five from 38 effectors as non effectors. The fungal sequence trained models were less accurate overall and showed a small amount more bias, again in the GRU-Embedding model, which was biased towards calling effectors as non-effectors and the CNN-LSTM model which was slightly biased in the opposite direction, calling non-effectors as effectors. The oomycete models were again quite balanced but the GRU-Embedding model showed a quite conservative tendancy calling 12 out of 17 effectors as non-effectors whilst getting all 17 non-effectors correct. Overall the models are accurate and show little to no bias toward false positive or false negatives, with the exception of the GRU-Embedding type. In oomycete sequences in particular and in this class of model across the different sequence types showed itself to tend to call real effectors as not of that class.
+
+Classification correlations between the different model architectures were high and positive in the bacterial sequence trained model's calls, in the range 0.8 to 0.88, see Figure \@ref(fig:confusionmodelcorrs). CNN-GRU and LSTM-Embedding showed identical prediction sets. We saw similar levels of correlation  in the CNN-LSTM, GRU-Embedding and CNN-GRU fungal sequence trained model, in the range 0.79 to 0.9 ; though there was a significantly lower range of correlations with the LSTM-Embedding which were in the range 0.36 to 0.51. The models trained on oomycete sequences all showed this lower range of correlations, in the range 0.30 to 0.65. The higher correlation across bacterial trained models is likely from a mixture of the larger training set size and a greater uniformity of the sequences themselves. For the fungal sequence trained models we can see that the LSTM-Embedding model does not perform as well as the others. The oomycete sequence trained models all show a lower range correlation reflecting the likely less uniform and smaller training set. It is clear that, particularly for the fungal and oomycete models, each architecture is capturing separate aspects of the sequences and classifying on those with slightly varying levels of success.
 
 ```{r confusionmodelcorrs, fig.height = 8, fig.width = 8, fig.cap = "Confusion matrices showing tendency of models to call false positive or false negative errors on the final test data; and Pearson correlations between classifications made by different models. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", message = FALSE, echo=FALSE}
 
@@ -350,7 +336,11 @@ corr_patch +
   plot_annotation(tag_levels = c("A"))
 ```
 
-```{r ensembleresults, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences."}
+## Ensemble Models
+
+We examined the usefulness of combining the predictions of the different model architectures using an ensemble function that takes the vectors of classifications of each model architecture as input. We performed the classification of the hold-out test data set using the ensembled models and the results can be seen in Figure \@ref(fig:ensembleresults). With the models trained in bacterial sequences we saw an increase in classification accuracy over the best model, up to 0.99 for both ensemble functions. However, with the fungal and oomycete models we saw decreases relative to the best single model in both cases due to the higher accuracy of the CNN-LSTM model being diluted by the combined inacuracy of the other model architectures. Examining the overlaps in classifications between the CNN-LSTM and CNN-GRU/LSTM-Embedding respectively showed that the two lesser performing models were not simply predicting subsets of the CNN-LSTM model, in both cases the lesser models were able to identify three effectors correctly that were missed by the generally stronger models. This indicates that the weaker models may be classifying on some patterns missed by the CNN-LSTM model.
+
+```{r ensembleresults, fig.width=8, fig.height=8, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences."}
 # apa_table(
 #   readr::read_tsv("tables/ensemble_model_performance.tab"),
 #   digits = 3,
@@ -368,7 +358,11 @@ readr::read_tsv("tables/ensemble_model_performance_tidy.tab") %>%
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 ```
 
-```{r vsothersmetrics, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", echo=FALSE, message=FALSE}
+## Comparison With Other Classification Software
+
+Given the accuracies of the above we selected the ensemble bacterial model and the CNN-LSTM fungal and oomycete models to evaluate the performance of our models against widely used effector identification software. We compared against predictions from the bacterial effector prediction programs deepT3 [@deept3] and effectiveT3 [@effectivet3], the fungal effector prediction programs EffectorP 1 and 2 [@effectorp, @effectorp2] and the oomycete effector predictor effectR [@effectR]. Each comparison was carried out using the respective hold-out test sequence set for each taxon. For all taxon we saw greater Accuracy and F1 scores from our models than the established software, as shown in Figure \@ref(fig:vsothersmetrics). This was particularly marked in the F1 score, which incorporates a measure of the incorrect calls. Absoloute improvements were up to 15 %  in bacterial sequences, 15 % in fungal sequences and 20 %  in the oomycete sequences. The confusion matrices in Figure \@ref(fig:vsotherscfmat) show that accuracy and F1 score was compromised in all the established tools by the tendency of them all to misclassify true effectors as not effectors.  All the established software classifiers we tested show lower sensitivity than the models we have developed here.
+
+```{r vsothersmetrics, fig.width=8, fig.height=8,fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", echo=FALSE, message=FALSE}
 data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
   dplyr::mutate(model = case_when(
     model == "ensemble_weighted" ~ "Ensemble Weighted",
@@ -399,7 +393,7 @@ data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 ```
 
-```{r vsotherscfmat, fig.width=9, fig.height=8, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences.", message = FALSE, echo=FALSE}
+```{r vsotherscfmat, fig.width=8, fig.height=8, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences.", message = FALSE, echo=FALSE}
 
 
 bacteria_confusion_mat_df <- readr::read_csv("data/processed/bacteria_confusion_mat_df.csv")
@@ -429,7 +423,11 @@ oomycete_conf <- plot_confusion_mat(
   plot_annotation(tag_levels = "A")
 ```
 
-```{r activations, fig.height=6, fig.width=10, fig.cap="Grad-CAM activation profiles of CNN-LSTM models trained on when run with all datasets; and sequence logo plots of sequence in the activation region within the dotted lines for effector data and non-effector data. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
+## Convolution Heatmaps
+
+An advantage of CNNs relative to other deep neural networks is their relative interpretability. A CNN can be analysed to activation maps which  highlight the regions of the input to which the CNN is most strongly using to classify. To examine the responses of the model, we ran the effector sequence ^[Ruth, can you confirm that this is what you did, we want the effector activations only, not the whole set, or at least the effector activations in one panel and the non-effectors in another] data sets back through the CNN-LSTM models for each taxon and extracted the network activations using the GRAD-CAM method. The profiles were smoothed using FFT and examined \@ref(fig:activations). All the models showed a peak of activation at the N-terminus of the sequences, coincident with expected positions of secretion signals. The fungal sequences created a single broad activation region with a width of 50 to 100 amino acids while the bacterial and oomycete sequences create a some smaller grouped peaks in a broader region which were each around 20 amino acids. We examined further the sequences under the largest peaks, specifically for bacterial sequences we used amino acids 25 to 50, for fungal sequences we used amino acids 35 to 80 and for oomycete sequences we used amino acids 15 to 40. Compositional analysis of the sequence under the peaks showed no apparent primary sequence conservation or motifs as shown in the logo plots in Fig \@ref(fig:activations) even within a taxon and data set. Enrichment analysis of different amino acid categories showed a statistically significant ($p < 0.05$) increase of hydrophobic amino acids in the effector sequences of bacteria and oomycete sequence regions relative to the combined effector and non effector set \@ref(tab:phyperaatype) and an enrichment of polar amino acids in oomycete sequences, though no enrichment of any type was found in the fungal effectors. These properties are consistent with the secreted role of known effector proteins. 
+
+```{r activations, fig.height=10, fig.width=10, fig.cap="Grad-CAM activation profiles of CNN-LSTM models trained on when run with all datasets; and sequence logo plots of sequence in the activation region within the dotted lines for effector data and non-effector data. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
 # knitr::include_graphics("figures/convolution_maps_fixed.pdf")
 
 all_bacteria <- rbind(
@@ -586,6 +584,22 @@ apa_table(
 ```
 
 
+## Software Implementation
+
+To make the models useful for developers in their own analytic pipelines we have provided an R package that provides a useful interface to the models. The package and installation instructions are available from GitHub [https://ruthkr.github.io/deepredeff](https://ruthkr.github.io/deepredeff) 
+
+<!-- 
+
+#########################################################
+## Start code fragments
+##
+##
+#########################################################
+
+-->
+
+
+
 # Discussion
 
 
@@ -673,12 +687,3 @@ apa_table(
 
 ```
 
-```{r acclossfinal}
- readr::read_tsv("tables/acc_loss_final.tab") %>%
-  knitr::kable( "latex", longtable = T, booktabs = T,
-           digits = 4,
-  align = 'c',
-  caption = 'Accuracy and loss values from best performing parameters values for each model'
-         ) %>%
-  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
-```
