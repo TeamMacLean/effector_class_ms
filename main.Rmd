@@ -18,7 +18,7 @@ author:
 abstract: "TBD."
 geometry: margin=1in
 biblio-style: apsr
-bibliography: ["r-references.bib", "r-packages.bib"]
+bibliography: ["r-references.bib"]
 graphics: yes
 header-includes:
   - \usepackage{amsmath}
@@ -39,7 +39,7 @@ source("functions/get_lower_corr_mat.R")
 source("functions/get_seqlogo.R")
 
 # Build R pacakges Bib build
-r_refs(file = "r-packages.bib")
+papaja::r_refs(file = "r-references.bib")
 
 # ggplot2 global theme
 theme_set(theme_bw())
@@ -525,7 +525,7 @@ heatmap_linebar_oomycete <- oomycete_heatmap %>%
   geom_vline(xintercept = 70, linetype = 'dashed', color = "red") +
   scale_x_continuous(breaks = seq(0, 750, 150)) +
   labs(x = 'Position', y = "Value") +
-  ggplot2::labs(tag = "B")
+  ggplot2::labs(tag = "C")
 
 heatmap_linebar_fungi <- fungi_heatmap %>%
   dplyr::mutate(index = V1 + 1) %>%
@@ -537,7 +537,7 @@ heatmap_linebar_fungi <- fungi_heatmap %>%
   geom_vline(xintercept = 80, linetype = 'dashed', color = "blue") +
   scale_x_continuous(breaks = seq(0, 750, 150)) +
   labs(x = 'Position', y = "Value") +
-  ggplot2::labs(tag = "C")
+  ggplot2::labs(tag = "B")
 
 seqlogo_patch <- (
   heatmap_linebar_bacteria +
