@@ -196,14 +196,21 @@ Given the accuracies of the above we selected the ensemble bacterial model and t
 
 ## Convolution Heatmaps
 
-An advantage of CNNs relative to other deep neural networks is their relative interpretability. A CNN can be analysed to activation maps which  highlight the regions of the input to which the CNN is most strongly using to classify. To examine the responses of the model, we ran the effector sequence ^[Ruth, can you confirm that this is what you did, we want the effector activations only, not the whole set, or at least the effector activations in one panel and the non-effectors in another] data sets back through the CNN-LSTM models for each taxon and extracted the network activations using the GRAD-CAM method. The profiles were smoothed using FFT and examined \@ref(fig:activations). All the models showed a peak of activation at the N-terminus of the sequences, coincident with expected positions of secretion signals. The fungal sequences created a single broad activation region with a width of 50 to 100 amino acids while the bacterial and oomycete sequences create a some smaller grouped peaks in a broader region which were each around 20 amino acids. Compositional analysis of the sequence under the peaks showed no apparent primary sequence conservation or motifs even within a taxon and data set. The sequences in the activation regions in all the taxa and models we examined did seem to be preferentially made up of hydrophobic and polar amino acids, which is apparently contradictory 
+An advantage of CNNs relative to other deep neural networks is their relative interpretability. A CNN can be analysed to activation maps which  highlight the regions of the input to which the CNN is most strongly using to classify. To examine the responses of the model, we ran the effector sequence ^[Ruth, can you confirm that this is what you did, we want the effector activations only, not the whole set, or at least the effector activations in one panel and the non-effectors in another] data sets back through the CNN-LSTM models for each taxon and extracted the network activations using the GRAD-CAM method. The profiles were smoothed using FFT and examined \@ref(fig:activations). All the models showed a peak of activation at the N-terminus of the sequences, coincident with expected positions of secretion signals. The fungal sequences created a single broad activation region with a width of 50 to 100 amino acids while the bacterial and oomycete sequences create a some smaller grouped peaks in a broader region which were each around 20 amino acids. We examined further the sequences under the largest peaks, specifically for bacterial sequences we used amino acids 25 to 50, for fungal sequences we used amino acids 35 to 80 and for oomycete sequences we used amino acids 15 to 40. Compositional analysis of the sequence under the peaks showed no apparent primary sequence conservation or motifs as shown in the logo plots in Fig \@ref(fig:activations) even within a taxon and data set. Enrichment analysis of different amino acid categories showed a statistically significant ($p < 0.05$) increase of hydrophobic amino acids in the effector sequences of bacteria and oomycete sequence regions relative to the combined effector and non effector set \@ref(tab:phyperaatype) and an enrichment of polar amino acids in oomycete sequences, though no enrichment of any type was found in the fungal effectors. These properties are consistent with the secreted role of known effector proteins. 
 
 ## Software Implementation
 
 To make the models useful for developers in their own analytic pipelines we have provided an R package that provides a useful interface to the models. The package and installation instructions are available from GitHub [https://ruthkr.github.io/deepredeff](https://ruthkr.github.io/deepredeff) 
 
+<!-- 
 
+#########################################################
+## Start code fragments
+##
+##
+#########################################################
 
+-->
 
 ```{r, effsummary, echo=FALSE,message = FALSE}
 
@@ -237,9 +244,6 @@ readr::read_tsv("tables/final_model_performance_tidy.tab") %>%
   ggplot2::geom_point(ggplot2::aes(colour = Accuracy)) +
   ggplot2::facet_wrap(~ Taxon, scales = "free_x") 
 ```
-
-
-
 
 ```{r confusionmodelcorrs, fig.height = 8, fig.width = 8, fig.cap = "Confusion matrices showing tendency of models to call false positive or false negative errors on the final test data; and Pearson correlations between classifications made by different models. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.", message = FALSE, echo=FALSE}
 # Load data
@@ -320,7 +324,6 @@ readr::read_tsv("tables/ensemble_model_performance_tidy.tab") %>%
   ggplot2::facet_wrap(~ Taxon, scales = "free_x")
 ```
 
-
 ```{r vsothersmetrics, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", message = FALSE, echo=FALSE}
 readr::read_tsv("tables/cfothertools.tab") %>% 
   ggplot2::ggplot() +
@@ -328,10 +331,6 @@ readr::read_tsv("tables/cfothertools.tab") %>%
   ggplot2::geom_point(ggplot2::aes(colour = Metric)) +
   ggplot2::facet_wrap(~ Group, scales = "free_x")
 ```
-
-
-
-
 
 ```{r vsotherscfmat, fig.width=9, fig.height=8, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences.", message = FALSE, echo=FALSE}
 # knitr::include_graphics("figures/cf_other_tools.png")
@@ -496,6 +495,29 @@ seqlogo_patch +
   plot_annotation(tag_levels = c("A", "1"), tag_sep = ".")
 ```
 
+```{r, phyperaatype, echo=FALSE, message=FALSE}
+source(here::here("functions","check_proportions_aas.R"))
+bacteria_result <- join_files("data/raw/bacteria_testing.csv", "data/raw/bacteria_training.csv", "data/raw/bacteria_validation.csv") %>% 
+  truncate_seqs(start = 25, stop = 50) %>% 
+  do_hyper()
+fungi_result <- join_files("data/raw/fungi_testing.csv", "data/raw/fungi_training.csv", "data/raw/fungi_validation.csv") %>% 
+  truncate_seqs(start = 35, stop = 80) %>% 
+  do_hyper()
+oomycete_result <- join_files("data/raw/oomycete_testing.csv", "data/raw/oomycete_training.csv", "data/raw/oomycete_validation.csv") %>% 
+  truncate_seqs(start = 15, stop = 40) %>% 
+  do_hyper()
+
+r <- bind_rows(list(bacteria_result, fungi_result, oomycete_result))
+r$Taxon <- c("Bacteria", "Fungi", "Oomycete") 
+r <- r %>% select(Taxon, Hydrophobic, Polar, Neutral, Basic, Acidic)
+apa_table(
+  r,
+  digits = 3,
+  align = 'c',
+  caption = 'Enrichment analysis of amino acid types. Probability by hypergeometric test of the observed number of amino acid type in the region of activation in effector sequences in our compiled sequence set relative to a background of the same region in all sequences in that taxon.'
+)
+```
+
 
 # Discussion
 
@@ -507,6 +529,16 @@ seqlogo_patch +
 
 
 # Supplementary Tables
+
+<!-- 
+
+#########################################################
+## Start supplementary information
+##
+##
+#########################################################
+
+-->
 
 
 ```{r, bacefftable, echo=FALSE, message = FALSE}
