@@ -25,6 +25,7 @@ graphics: yes
 header-includes:
   - \usepackage{amsmath}
   - \usepackage{siunitx}
+  - \usepackage{float}
 ---
 
 ```{r setup, include = FALSE}
@@ -340,7 +341,7 @@ corr_patch +
 
 We examined the usefulness of combining the predictions of the different model architectures using an ensemble function that takes the vectors of classifications of each model architecture as input. We performed the classification of the hold-out test data set using the ensembled models and the results can be seen in Figure \@ref(fig:ensembleresults). With the models trained in bacterial sequences we saw an increase in classification accuracy over the best model, up to 0.99 for both ensemble functions. However, with the fungal and oomycete models we saw decreases relative to the best single model in both cases due to the higher accuracy of the CNN-LSTM model being diluted by the combined inacuracy of the other model architectures. Examining the overlaps in classifications between the CNN-LSTM and CNN-GRU/LSTM-Embedding respectively showed that the two lesser performing models were not simply predicting subsets of the CNN-LSTM model, in both cases the lesser models were able to identify three effectors correctly that were missed by the generally stronger models. This indicates that the weaker models may be classifying on some patterns missed by the CNN-LSTM model.
 
-```{r ensembleresults, fig.width=8, fig.height=8, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences."}
+```{r ensembleresults, fig.width=8, fig.height=4, fig.cap="Final performance of Ensemble models in each taxon on the unseen, hold-out test data fraction of sequences."}
 # apa_table(
 #   readr::read_tsv("tables/ensemble_model_performance.tab"),
 #   digits = 3,
@@ -369,12 +370,22 @@ apa_table(
   readr::read_csv("data/processed/acc_f1score_result_effectorp_data_prediction.csv"),
   digits = 4,
   align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of EffectorP data evaluated on Deepredeff and both EffectorP 1.0 and EffectorP 2.0',
-  placement = "h"
+  caption = 'Accuracy and F1-Score from prediction results of EffectorP data evaluated on our model and both EffectorP 1.0 and EffectorP 2.0',
+  placement = "H"
 )
 ```
 
-```{r vsothersmetrics, fig.width=8, fig.height=8,fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", echo=FALSE, message=FALSE}
+```{r accf1scoreeffectivet3data}
+apa_table(
+  readr::read_csv("data/processed/acc_f1score_result_effectivet3_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of EffeciveT3 positive data evaluated on our model and EffectiveT3 trained on both plant associated protein and all protein.',
+  placement = "H"
+)
+```
+
+```{r vsothersmetrics, fig.width=8, fig.height=4, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", fig.pos="H"}
 data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
   dplyr::mutate(model = case_when(
     model == "ensemble_weighted" ~ "Ensemble Weighted",
@@ -405,8 +416,7 @@ data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 ```
 
-```{r vsotherscfmat, fig.width=8, fig.height=8, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences.", message = FALSE, echo=FALSE}
-
+```{r vsotherscfmat, fig.width=8, fig.height=8, fig.cap="Confusion matrices of classifications made by our models compared with those made by widely used software. A: Tools evaluated on bacterial sequences; B: Tools evaluated on fungal sequences; C: Tools evaluated on oomycete sequences.", fig.pos="H"}
 
 bacteria_confusion_mat_df <- readr::read_csv("data/processed/bacteria_confusion_mat_df.csv")
 fungi_confusion_mat_df <- readr::read_csv("data/processed/fungi_confusion_mat_df.csv")
@@ -435,9 +445,8 @@ oomycete_conf <- plot_confusion_mat(
   plot_annotation(tag_levels = "A")
 ```
 
+```{r effectorpdatacfmat, fig.width=6, fig.height=6, fig.cap="Confusion matrices of classifications made by our fungi model compared with EffectorP 1.0 and EffectorP 2.0 evaluated on both training and validation EffectorP data.", fig.pos="H"}
 
-
-```{r effectorpdatacfmat, fig.width=6, fig.height=6, fig.cap="Confusion matrices of classifications made by our fungi model compared with EffectorP 1.0 and EffectorP 2.0 evaluated on both training and validation EffectorP data.", message = FALSE, echo=FALSE}
 readr::read_csv("data/processed/conf_mat_effectorp_data_prediction.csv") %>% 
   ggplot2::ggplot() +
   ggplot2::aes(x = Truth, y = Prediction) +
@@ -449,6 +458,21 @@ readr::read_csv("data/processed/conf_mat_effectorp_data_prediction.csv") %>%
   ggplot2::coord_fixed()
 ```
 
+```{r effectivet3datacfmat, fig.width=6, fig.height=3, fig.cap="Confusion matrices of classifications made by our bacteria model compared with both EffectiveT3 based on plant associated and all protein evaluated on positive EffectiveT3 data.", fig.pos="H"}
+
+readr::read_csv("data/processed/conf_mat_effectivet3_data_prediction.csv") %>% 
+  dplyr::mutate(
+  tool = factor(tool, levels = c("ensemble_weighted", "effectivet3_all", "effectivet3_plant"))
+  ) %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = Truth, y = Prediction) +
+  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
+  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
+  ggplot2::facet_grid(~tool) +
+  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
+  ggplot2::labs(x = "True value", y = "Prediction") +
+  ggplot2::coord_fixed()
+```
 
 ## Convolution Heatmaps
 
