@@ -362,6 +362,18 @@ readr::read_tsv("tables/ensemble_model_performance_tidy.tab") %>%
 
 Given the accuracies of the above we selected the ensemble bacterial model and the CNN-LSTM fungal and oomycete models to evaluate the performance of our models against widely used effector identification software. We compared against predictions from the bacterial effector prediction programs deepT3 [@deept3] and effectiveT3 [@effectivet3], the fungal effector prediction programs EffectorP 1 and 2 [@effectorp, @effectorp2] and the oomycete effector predictor effectR [@effectR]. Each comparison was carried out using the respective hold-out test sequence set for each taxon. For all taxon we saw greater Accuracy and F1 scores from our models than the established software, as shown in Figure \@ref(fig:vsothersmetrics). This was particularly marked in the F1 score, which incorporates a measure of the incorrect calls. Absoloute improvements were up to 15 %  in bacterial sequences, 15 % in fungal sequences and 20 %  in the oomycete sequences. The confusion matrices in Figure \@ref(fig:vsotherscfmat) show that accuracy and F1 score was compromised in all the established tools by the tendency of them all to misclassify true effectors as not effectors.  All the established software classifiers we tested show lower sensitivity than the models we have developed here.
 
+We are also interested in evaluating positive datasets from other tools on our model and compare the results when the datasets evaluated on their own tool. Table \@ref(tab:accf1scoreeffectorpdata) shows the of accuracy and F1 score values of classification results of three different positive datasets from EffectorP 1.0 and 2.0.
+
+```{r accf1scoreeffectorpdata}
+apa_table(
+  readr::read_csv("data/processed/acc_f1score_result_effectorp_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of EffectorP data evaluated on Deepredeff and both EffectorP 1.0 and EffectorP 2.0',
+  placement = "h"
+)
+```
+
 ```{r vsothersmetrics, fig.width=8, fig.height=8,fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", echo=FALSE, message=FALSE}
 data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
   dplyr::mutate(model = case_when(
@@ -422,6 +434,21 @@ oomycete_conf <- plot_confusion_mat(
   plot_layout(ncol = 1, heights = c(1,1,1)) +
   plot_annotation(tag_levels = "A")
 ```
+
+
+
+```{r effectorpdatacfmat, fig.width=6, fig.height=6, fig.cap="Confusion matrices of classifications made by our fungi model compared with EffectorP 1.0 and EffectorP 2.0 evaluated on both training and validation EffectorP data.", message = FALSE, echo=FALSE}
+readr::read_csv("data/processed/conf_mat_effectorp_data_prediction.csv") %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = Truth, y = Prediction) +
+  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
+  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
+  ggplot2::facet_grid(data ~ tool) +
+  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
+  ggplot2::labs(x = "True value", y = "Prediction") +
+  ggplot2::coord_fixed()
+```
+
 
 ## Convolution Heatmaps
 
@@ -621,13 +648,14 @@ To make the models useful for developers in their own analytic pipelines we have
 -->
 
 \beginsupplement
-```{r, bacefftable, echo=FALSE, message = FALSE}
 
+```{r, bacefftable, echo=FALSE, message = FALSE}
 apa_table(
   readr::read_tsv("tables/bacterial_effector_count.tab"),
   digits = 0,
   align = 'c',
-  caption = 'Bacterial species contributing to the bacterial effector sequence set retrieved from PHI-Base'
+  caption = 'Bacterial species contributing to the bacterial effector sequence set retrieved from PHI-Base',
+  placement = "h"
 )
 ```
 
@@ -677,13 +705,15 @@ apa_table(
 ```
 
 ```{r, hyperparam}
- readr::read_tsv("tables/hyperparamscan_info.tab") %>%
-  knitr::kable( "latex", longtable = T, booktabs = T,
-           digits = 0,
-  align = 'c',
-  caption = 'Hyperparameters used in automatic scanning of hyperparameter space and best performing parameters values for each model'
-         ) %>%
+readr::read_tsv("tables/hyperparamscan_info.tab") %>%
+  knitr::kable(
+    "latex", 
+    longtable = T, 
+    booktabs = T,
+    digits = 0,
+    align = 'c',
+    caption = 'Hyperparameters used in automatic scanning of hyperparameter space and best performing parameters values for each model'
+  ) %>%
   kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
-
 ```
 
