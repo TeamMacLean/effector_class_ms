@@ -1,0 +1,95 @@
+#Identifier	Prediction	Probability
+AvrM	Non-effector	0.996
+AvrL567-A	Effector	0.761
+AvrP123	Effector	1.0
+AvrP4	Effector	0.999
+AvrM14	Effector	0.951
+AvrL2-A	Effector	0.557
+RTP1	Effector	0.845
+PGTG_08638	Non-effector	0.89
+AvrSr50	Effector	0.929
+PstSCR1 (PSTha2a5)	Effector	0.999
+PpEC23	Non-effector	0.907
+PST_Pec6	Effector	1.0
+AVRk1 Blumeria graminis	Effector	0.965
+AVRa1 CSEP0008 Blumeria graminis	Effector	0.947
+AVRA13 CSEP0372 Blumeria graminis	Effector	0.869
+AvrPm2 Blumeria graminis	Effector	0.991
+AVR9 Cladosporium fulvum	Effector	1.0
+AVR4 Cladosporium fulvum	Effector	1.0
+AVR4E Cladosporium fulvum	Effector	0.995
+AVR2 protein Cladosporium fulvum	Effector	1.0
+Avr5 Cladosporium fulvum	Effector	1.0
+ECP6 Cladosporium fulvum	Effector	0.911
+ECP2 Cladosporium fulvum	Effector	0.997
+ECP1 Cladosporium fulvum	Effector	1.0
+ECP5 Cladosporium fulvum	Effector	0.987
+ECP4 Cladosporium fulvum	Effector	0.703
+AvrLm6 Leptosphaeria maculans	Effector	0.991
+AvrLm4-7 Leptosphaeria maculans	Effector	0.997
+AvrLm1 Leptosphaeria maculans	Effector	0.979
+AvrLm11 Leptosphaeria maculans	Effector	1.0
+SIX4	Effector	0.84
+SIX3	Effector	0.937
+SIX1	Effector	0.572
+SIX6	Effector	0.988
+SIX2	Effector	0.985
+SIX5	Effector	0.999
+SIX7	Non-effector	0.808
+SIX8	Effector	0.996
+AVR-Pita1	Effector	0.992
+Pwl1	Effector	1.0
+AVR-Pia	Effector	0.96
+BAS3	Effector	1.0
+BAS2	Effector	1.0
+BAS4	Effector	1.0
+BAS1	Effector	0.998
+AvrPiz-t	Effector	0.944
+Avr1-CO39	Effector	0.952
+AVR-Pii	Effector	0.987
+AVR-Pik	Effector	0.962
+MC69	Effector	0.999
+BAS107	Effector	0.978
+AvrPib	Effector	0.794
+lug6	Effector	0.948
+Iug9	Effector	0.762
+Msp1	Non-effector	0.804
+MoHEG13	Effector	1.0
+MoCDIP1	Non-effector	0.664
+MoCDIP2	Non-effector	0.869
+MoCDIP3	Effector	1.0
+MoCDIP4	Non-effector	0.784
+MoCDIP5	Effector	0.93
+SPD2	Effector	1.0
+SPD4	Effector	0.992
+SPD7	Effector	0.997
+BAS162	Effector	0.921
+SPD9	Non-effector	0.984
+SPD10	Effector	1.0
+AvrPi9	Effector	1.0
+NIP1	Effector	1.0
+NIP2	Effector	1.0
+NIP3	Effector	1.0
+Vdlsc1 Isochorismatase hydrolase Verticillium dahliae	Effector	0.994
+Ave1 Verticillium dahliae	Effector	0.948
+VdSCP7 Verticillium dahliae	Effector	0.998
+PevD1 Verticillium dahliae	Effector	0.794
+Cmu1 Ustilago maydis	Non-effector	0.787
+Pep1 Ustilago maydis	Effector	0.769
+Pit2 Ustilago maydis	Effector	0.949
+Tin2 Ustilago maydis	Effector	0.689
+UhAvr1 Ustilago hordei	Effector	0.896
+eff1-1 Ustilago maydis	Non-effector	1.0
+See1 Ustilago maydis	Effector	0.772
+ToxA	Effector	0.998
+Tox1	Effector	1.0
+Tox3	Effector	0.87
+ToxB	Effector	0.812
+NEP1	Effector	0.976
+MISSP7	Effector	0.981
+AvrStb6	Effector	1.0
+Zt6	Non-effector	0.757
+CgEP1 Colletotrichum graminicola	Effector	1.0
+Cgfl Extracellular metalloproteinase mep Colletotrichum graminicola	Non-effector	1.0
+FGL1 Fusarium graminearum	Non-effector	0.996
+SsSSVP1 Sclerotinia sclerotiorum	Effector	0.799
