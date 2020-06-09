@@ -385,6 +385,17 @@ apa_table(
 )
 ```
 
+```{r accf1scoredeept3data}
+apa_table(
+  readr::read_csv("data/processed/acc_f1score_result_deept3_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of three different DeepT3 positive datasets evaluated on our model and DeepT3.',
+  placement = "H"
+)
+```
+
+
 ```{r vsothersmetrics, fig.width=8, fig.height=4, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", fig.pos="H"}
 data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
   dplyr::mutate(model = case_when(
@@ -469,6 +480,23 @@ readr::read_csv("data/processed/conf_mat_effectivet3_data_prediction.csv") %>%
   ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
   ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
   ggplot2::facet_grid(~tool) +
+  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
+  ggplot2::labs(x = "True value", y = "Prediction") +
+  ggplot2::coord_fixed()
+```
+
+
+```{r deept3datacfmat, fig.height=8, fig.cap="Confusion matrices of classifications made by our bacteria model compared with DeepT3 evaluated on positive EffectiveT3 data.", fig.pos="H", message=FALSE}
+
+readr::read_csv("data/processed/conf_mat_deept3_data_prediction.csv") %>% 
+  dplyr::mutate(
+  tool = factor(tool, levels = c("ensemble_weighted", "deept3"))
+  ) %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = Truth, y = Prediction) +
+  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
+  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
+  ggplot2::facet_grid(data ~ tool) +
   ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
   ggplot2::labs(x = "True value", y = "Prediction") +
   ggplot2::coord_fixed()
