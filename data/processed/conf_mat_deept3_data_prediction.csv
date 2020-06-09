@@ -1,0 +1,13 @@
+Prediction,Truth,Freq,data,tool
+effector,effector,80,deept3_P.syringae_nr_effector,ensemble_weighted
+non-effector,effector,3,deept3_P.syringae_nr_effector,ensemble_weighted
+effector,effector,35,deept3_pos_independent_test,ensemble_weighted
+non-effector,effector,0,deept3_pos_independent_test,ensemble_weighted
+effector,effector,258,deept3_pos_training,ensemble_weighted
+non-effector,effector,25,deept3_pos_training,ensemble_weighted
+effector,effector,70,deept3_P.syringae_nr_effector,deept3
+non-effector,effector,13,deept3_P.syringae_nr_effector,deept3
+effector,effector,24,deept3_pos_independent_test,deept3
+non-effector,effector,11,deept3_pos_independent_test,deept3
+effector,effector,242,deept3_pos_training,deept3
+non-effector,effector,41,deept3_pos_training,deept3

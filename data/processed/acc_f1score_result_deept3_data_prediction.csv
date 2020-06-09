@@ -1,0 +1,7 @@
+Data,Tool,Accuracy,F1 Score
+deept3_P.syringae_nr_effector,ensemble_weighted,0.963855421686747,0.9815950920245399
+deept3_pos_independent_test,ensemble_weighted,1,1
+deept3_pos_training,ensemble_weighted,0.911660777385159,0.9537892791127541
+deept3_P.syringae_nr_effector,deept3,0.8433734939759037,0.9150326797385622
+deept3_pos_independent_test,deept3,0.6857142857142857,0.8135593220338984
+deept3_pos_training,deept3,0.8551236749116607,0.9219047619047619
