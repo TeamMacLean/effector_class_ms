@@ -1,0 +1,41 @@
+Data Set,Tool,Metric,Value,Taxon
+6 effectors,cnn_lstm,F1 Score,0.782608696,Oomycete
+6 effectors,effectR,F1 Score,0.923076923,Oomycete
+P.syringae NR,ens_weight,F1 Score,0.981595092,Bacteria
+Positive Ind,ens_weight,F1 Score,1,Bacteria
+Positive Training,ens_weight,F1 Score,0.953789279,Bacteria
+P.syringae NR,Deep T3,F1 Score,0.91503268,Bacteria
+Positive Ind,Deep T3,F1 Score,0.813559322,Bacteria
+Positive Training,Deep T3,F1 Score,0.921904762,Bacteria
+EffectiveT3 Training,Effective T3 All,F1 Score,0.787456446,Bacteria
+EffectiveT3 Training,Effective T3 Plants,F1 Score,0.573770492,Bacteria
+EffectiveT3 Training,ens_weight,F1 Score,0.964285714,Bacteria
+EffectorP1 Training,cnn_lstm,F1 Score,0.884615385,Fungi
+EffectorP2 Training,cnn_lstm,F1 Score,0.839506173,Fungi
+EffectorP2 Validation,cnn_lstm,F1 Score,0.864864865,Fungi
+EffectorP1 Training,EffectorP,F1 Score,0.954954955,Fungi
+EffectorP2 Training,EffectorP,F1 Score,0.91954023,Fungi
+EffectorP2 Validation,EffectorP,F1 Score,0.864864865,Fungi
+EffectorP1 Training,EffectorP 2,F1 Score,0.991304348,Fungi
+EffectorP2 Training,EffectorP 2,F1 Score,0.972677596,Fungi
+EffectorP2 Validation,EffectorP 2,F1 Score,0.864864865,Fungi
+6 effectors,cnn_lstm,Accuracy,0.642857143,Oomycete
+6 effectors,effectR,Accuracy,0.857142857,Oomycete
+P.syringae NR,ens_weight,Accuracy,0.963855422,Bacteria
+Positive Ind,ens_weight,Accuracy,1,Bacteria
+Positive Training,ens_weight,Accuracy,0.911660777,Bacteria
+P.syringae NR,Deep T3,Accuracy,0.843373494,Bacteria
+Positive Ind,Deep T3,Accuracy,0.685714286,Bacteria
+Positive Training,Deep T3,Accuracy,0.855123675,Bacteria
+EffectiveT3 Training,Effective T3 All,Accuracy,0.649425287,Bacteria
+EffectiveT3 Training,Effective T3 Plants,Accuracy,0.402298851,Bacteria
+EffectiveT3 Training,ens_weight,Accuracy,0.931034483,Bacteria
+EffectorP1 Training,cnn_lstm,Accuracy,0.793103448,Fungi
+EffectorP2 Training,cnn_lstm,Accuracy,0.723404255,Fungi
+EffectorP2 Validation,cnn_lstm,Accuracy,0.761904762,Fungi
+EffectorP1 Training,EffectorP,Accuracy,0.913793103,Fungi
+EffectorP2 Training,EffectorP,Accuracy,0.85106383,Fungi
+EffectorP2 Validation,EffectorP,Accuracy,0.761904762,Fungi
+EffectorP1 Training,EffectorP 2,Accuracy,0.982758621,Fungi
+EffectorP2 Training,EffectorP 2,Accuracy,0.946808511,Fungi
+EffectorP2 Validation,EffectorP 2,Accuracy,0.761904762,Fungi

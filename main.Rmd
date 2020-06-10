@@ -158,6 +158,12 @@ To find the importance of sequence position detected by our model, we took the o
 
 Following the process mentioned above, we then summed all of the activation map results of all sequences in our datasets for each taxon and normalised them. Next, the final summed activation map for each taxon was smoothed using fourier analysis and plotted the smoothed version for each of them. The code on computing and visualising these heatmaps can be found on [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps) .
 
+## Effector Prediction Software and Training data
+
+To test the performance of our models against commonly used tools we used DeepT3 version 1 [@deept3] and EffectiveT3 version 1.0.1 [@effectivet3] for bacterial sequences. Effector P Version 1.0 and 2.0 [@effectorp, @effectorp2] for fungal sequences and EffectR [@effectR] for oomycete sequences. All the models publish the datasets used to train the models or some examples. We used positive training examples (effector sequence examples) in the comparisons we performed. EffectorP provides three different positive datasets (training, test and hold-out validation) for EffectorP 1.0 and 2.0 at [http://effectorp.csiro.au./data.html](http://effectorp.csiro.au./data.html). EffectiveT3 provides a training set at [https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa](https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa). DeepT3 provides three sets, a non redundant Pseudomonas syringae effector dataset, a training dataset and a test data set at [https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data](https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data). EffectR provides 6 oomycete sequences, namely *PexRD36*, *PexRD1*, *ipi01/Avrblb1*, *Avr1*, *Avr4*, and *Avr3a*. All these sets were used in their respective tools with default settings.   
+
+
+
 # Results
 
 ## Sequence Collection
@@ -361,61 +367,13 @@ readr::read_tsv("tables/ensemble_model_performance_tidy.tab") %>%
 
 ## Comparison With Other Classification Software
 
-Given the accuracies of the above we selected the ensemble bacterial model and the CNN-LSTM fungal and oomycete models to evaluate the performance of our models against widely used effector identification software. We compared against predictions from the bacterial effector prediction programs DeepT3 [@deept3] and EffectiveT3 classification module for plant-associated bacteria 1.0.1 [@effectivet3], the fungal effector prediction programs EffectorP 1.0 and 2.0 [@effectorp, @effectorp2] and the oomycete effector predictor EffectR [@effectR]. Each comparison was carried out using the respective hold-out test sequence set for each taxon. For all taxon we saw greater Accuracy and F1 scores from our models than the established software, as shown in Figure \@ref(fig:vsothersmetrics). This was particularly marked in the F1 score, which incorporates a measure of the incorrect calls. Absoloute improvements were up to 15 %  in bacterial sequences, 15 % in fungal sequences and 20 %  in the oomycete sequences. The confusion matrices in Figure \@ref(fig:vsotherscfmat) show that accuracy and F1 score was compromised in all the established tools by the tendency of them all to misclassify true effectors as not effectors.  All the established software classifiers we tested show lower sensitivity than the models we have developed here.
+Given the accuracies of the above we selected the ensemble bacterial model and the CNN-LSTM fungal and oomycete models to evaluate the performance of our models against widely used effector identification software. We compared against predictions from the bacterial effector prediction programs DeepT3 [@deept3] and EffectiveT3 classification module for plant-associated bacteria 1.0.1 [@effectivet3], the fungal effector prediction programs EffectorP 1.0 and 2.0 [@effectorp, @effectorp2] and the oomycete effector predictor EffectR [@effectR]. Each comparison was carried out using the respective hold-out test sequence set for each taxon. For all taxon we saw greater Accuracy and F1 scores from our models than the established software, as shown in Figure \@ref(fig:vsothersmetrics). This was particularly marked in the F1 score, which incorporates a measure of the incorrect calls. Absolute improvements were up to 15 %  in bacterial sequences, 15 % in fungal sequences and 20 %  in the oomycete sequences. The confusion matrices in Figure \@ref(fig:vsotherscfmat) show that accuracy and F1 score was compromised in all the established tools by the tendency of them all to misclassify true effectors as not effectors.  All the established software classifiers we tested show lower sensitivity than the models we have developed here. 
 
-We are also interested in evaluating positive datasets from other tools on both our model and on theirs, to be able to have a more unbiased comparison of the models' performance. Table \@ref(tab:accf1scoreeffectorpdata) shows the of accuracy and F1 score values of classification results of three different positive datasets from EffectorP 1.0 and 2.0 which can be found in [http://effectorp.csiro.au./data.html](http://effectorp.csiro.au./data.html). As it can be seen, EffectorP tends perform better on their training data compared to the validation data, which indicates that EffectorP is likely overfitted to the traning data which makes it less generalised.
+We also evaluated the deep learning models we have developed on the training and hold-out validation sequences used to train the previous methods. We calculated accuracy and F1 score of all the tools on their respective training and validation sets, according to availability. The bacterial tools EffectiveT3 and DeepT3 showed lower accuracies and F1 score on all sequence sets tested, than our Ensemble Weighted model, as in Figure \@ref(fig:owndata)A, consistent with the observation that our Ensemble Weighted model performed more strongly on the validation set that we generated. Interestingly, both versions of EffectorP showed greater accuracy and F1 score on the EffectorP provided training sets than our CNN-LSTM model, but in the unseen validation data provided with EffectorP 2, all three models performed identically in both metrics \@ref(fig:owndata)B. The EffectorP 1 and 2 scores on validation data are well below the scores for the training data, a result that is usually interpreted as being evidence of an overfitted and less generalisable model. Our CNN-LSTM model for fungi showed similar scores across the training and validation set indicating a greater generability. Only six effector sequences are provided as examples with the oomycete specific effector finder effectR. As this is not a trainable model in the same sense as the others, no large training set is needed. We attempted classification with these and effectR was able to classify X of the six ^[Ruth, can you add the actual numbers of classified for this one], whereas our CNN-LSTM model for oomycetes classified  Y of the six\ref(fig:owndata)C.
 
-The accuracy and F1 score values of evaluating positive dataset of EffectiveT3 obtained from [https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa](https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa) and positive datasets of DeepT3 obtained from [https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data](https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data) are shown in Table
-\@ref(tab:accf1scoreeffectivet3data) and  \@ref(tab:accf1scoredeept3data), respectively. Our ensemble weighted bacteria model performs better in classifing effector than using both EffectiveT3 for plant-associated bacteria and for all bacteria (see Table \@ref(tab:accf1scoreeffectivet3data)). Similar case with DeepT3 datasets, overall as shown in Table \@ref(tab:accf1scoredeept3data), our ensemble model for bacteria improved the performance of DeepT3. 
+Overall our model performed more strongly than those previously available ones tested across the range of sequences examined.
 
-Table \@ref(tab:accf1scoreeffectRdata) shows the results of examining several reference RxLR effectors (PexRD36, PexRD1, ipi01/Avrblb1, Avr1, Avr4, and Avr3a) used by EffectR [@effectR] on both our CNN-LSTM model and EffectR. It is shown that our model is able to recognise around 64% of the oomycete effector sequence data without having any prior knowledge of effector motifs as it is required in EffectR. 
-
-
-
-
-
-```{r accf1scoreeffectorpdata}
-apa_table(
-  readr::read_csv("data/processed/acc_f1score_result_effectorp_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of EffectorP data evaluated on our model and both EffectorP 1.0 and EffectorP 2.0',
-  placement = "H"
-)
-```
-
-```{r accf1scoreeffectivet3data}
-apa_table(
-  readr::read_csv("data/processed/acc_f1score_result_effectivet3_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of EffeciveT3 positive data evaluated on our model and EffectiveT3 trained on both plant associated protein and all protein.',
-  placement = "H"
-)
-```
-
-```{r accf1scoredeept3data}
-apa_table(
-  readr::read_csv("data/processed/acc_f1score_result_deept3_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of three different DeepT3 positive datasets evaluated on our model and DeepT3.',
-  placement = "H"
-)
-```
-
-```{r accf1scoreeffectRdata}
-apa_table(
-  readr::read_csv("data/processed/acc_f1_score_effectR_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of reference sequences of EffectR evaluated on our model and EffectR.',
-  placement = "H"
-)
-```
-
-
-```{r vsothersmetrics, fig.width=8, fig.height=4, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", fig.pos="H"}
+```{r vsothersmetrics, fig.width=8, fig.height=6, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", fig.pos="H"}
 data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
   dplyr::mutate(model = case_when(
     model == "ensemble_weighted" ~ "Ensemble Weighted",
@@ -475,68 +433,30 @@ oomycete_conf <- plot_confusion_mat(
   plot_annotation(tag_levels = "A")
 ```
 
-```{r effectorpdatacfmat, fig.width=6, fig.height=6, fig.cap="Confusion matrices of classifications made by our fungi model compared with EffectorP 1.0 and EffectorP 2.0 evaluated on both training and validation EffectorP data.", fig.pos="H", message=FALSE, include=FALSE}
+```{r, owndata, fig.height = 8, fig.cap="Performance of models on training and validation datasets used to train other effector prediction tools. A: Tools trained on bacterial sequences; B: Tools trained on fungal sequences; C: Tools trained on oomycete sequences."}
+d <- readr::read_csv(here::here("data","processed", "owndatasets.csv"))  
+  
+  mkplot <- function(df, which_tax ) {
+    df$Tool <- factor(df$Tool, levels = c("cnn_lstm", "ens_weight", "Effective T3 All", "Effective T3 Plants", "Deep T3", "EffectorP", "EffectorP 2", "effectR"))
+    p <- df %>% filter(Taxon == which_tax) %>% 
+     ggplot() +
+    aes(Tool, Value) +
+    geom_point(aes(colour = Metric)) +
+    facet_grid(  ~ `Data Set`, scales = "free") + 
+      theme_bw() +
+      scale_color_viridis_d()
+  }
 
-readr::read_csv("data/processed/conf_mat_effectorp_data_prediction.csv") %>% 
-  ggplot2::ggplot() +
-  ggplot2::aes(x = Truth, y = Prediction) +
-  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
-  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
-  ggplot2::facet_grid(data ~ tool) +
-  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
-  ggplot2::labs(x = "True value", y = "Prediction") +
-  ggplot2::coord_fixed()
+  
+bac <- mkplot(d, "Bacteria")  + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme(axis.title.x = element_blank()) 
+fungi <- mkplot(d, "Fungi") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme(axis.title.x = element_blank())
+#fungi <- mkplot(d, "Fungi")
+oom <- mkplot(d, "Oomycete")
+
+#bac_eft3 #| 
+bac / fungi / oom + plot_layout(guides = "collect") + plot_annotation(tag_levels = 'A')
 ```
 
-```{r effectivet3datacfmat, fig.width=6, fig.height=3, fig.cap="Confusion matrices of classifications made by our bacteria model compared with both EffectiveT3 based on plant associated and all protein evaluated on positive EffectiveT3 data.", fig.pos="H", message=FALSE, include=FALSE}
-
-readr::read_csv("data/processed/conf_mat_effectivet3_data_prediction.csv") %>% 
-  dplyr::mutate(
-  tool = factor(tool, levels = c("ensemble_weighted", "effectivet3_all", "effectivet3_plant"))
-  ) %>% 
-  ggplot2::ggplot() +
-  ggplot2::aes(x = Truth, y = Prediction) +
-  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
-  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
-  ggplot2::facet_grid(~tool) +
-  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
-  ggplot2::labs(x = "True value", y = "Prediction") +
-  ggplot2::coord_fixed()
-```
-
-
-```{r deept3datacfmat, fig.height=8, fig.cap="Confusion matrices of classifications made by our bacteria model compared with DeepT3 evaluated on positive EffectiveT3 data.", fig.pos="H", message=FALSE, include=FALSE}
-
-readr::read_csv("data/processed/conf_mat_deept3_data_prediction.csv") %>% 
-  dplyr::mutate(
-  tool = factor(tool, levels = c("ensemble_weighted", "deept3"))
-  ) %>% 
-  ggplot2::ggplot() +
-  ggplot2::aes(x = Truth, y = Prediction) +
-  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
-  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
-  ggplot2::facet_grid(data ~ tool) +
-  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
-  ggplot2::labs(x = "True value", y = "Prediction") +
-  ggplot2::coord_fixed()
-```
-
-
-```{r effectRdatacfmat, fig.width=6, fig.height=3, fig.cap="Confusion matrices of classifications made by our bacteria model compared with both EffectiveT3 based on plant associated and all protein evaluated on positive EffectiveT3 data.", fig.pos="H", message=FALSE, include=FALSE}
-
-readr::read_csv("data/processed/conf_mat_effectR_data_prediction.csv") %>% 
-  dplyr::mutate(
-  tool = factor(tool, levels = c("cnn_lstm", "effectR"))
-  ) %>% 
-  ggplot2::ggplot() +
-  ggplot2::aes(x = Truth, y = Prediction) +
-  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
-  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
-  ggplot2::facet_grid(~tool) +
-  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
-  ggplot2::labs(x = "True value", y = "Prediction") +
-  ggplot2::coord_fixed()
-```
 
 ## Convolution Heatmaps
 
@@ -805,3 +725,42 @@ readr::read_tsv("tables/hyperparamscan_info.tab") %>%
   kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
 ```
 
+```{r accf1scoreeffectorpdata}
+apa_table(
+  readr::read_csv("data/processed/acc_f1score_result_effectorp_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of EffectorP data evaluated on our model and both EffectorP 1.0 and EffectorP 2.0',
+  placement = "H"
+)
+```
+
+```{r accf1scoreeffectivet3data}
+apa_table(
+  readr::read_csv("data/processed/acc_f1score_result_effectivet3_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of EffeciveT3 positive data evaluated on our model and EffectiveT3 trained on both plant associated protein and all protein.',
+  placement = "H"
+)
+```
+
+```{r accf1scoredeept3data}
+apa_table(
+  readr::read_csv("data/processed/acc_f1score_result_deept3_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of three different DeepT3 positive datasets evaluated on our model and DeepT3.',
+  placement = "H"
+)
+```
+
+```{r accf1scoreeffectRdata}
+apa_table(
+  readr::read_csv("data/processed/acc_f1_score_effectR_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of reference sequences of EffectR evaluated on our model and EffectR.',
+  placement = "H"
+)
+```
