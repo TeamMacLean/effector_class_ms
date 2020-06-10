@@ -395,6 +395,16 @@ apa_table(
 )
 ```
 
+```{r accf1scoreeffectRdata}
+apa_table(
+  readr::read_csv("data/processed/acc_f1_score_effectR_data_prediction.csv"),
+  digits = 4,
+  align = 'c',
+  caption = 'Accuracy and F1-Score from prediction results of reference sequences of EffectR evaluated on our model and EffectR.',
+  placement = "H"
+)
+```
+
 
 ```{r vsothersmetrics, fig.width=8, fig.height=4, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", fig.pos="H"}
 data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
@@ -456,7 +466,7 @@ oomycete_conf <- plot_confusion_mat(
   plot_annotation(tag_levels = "A")
 ```
 
-```{r effectorpdatacfmat, fig.width=6, fig.height=6, fig.cap="Confusion matrices of classifications made by our fungi model compared with EffectorP 1.0 and EffectorP 2.0 evaluated on both training and validation EffectorP data.", fig.pos="H"}
+```{r effectorpdatacfmat, fig.width=6, fig.height=6, fig.cap="Confusion matrices of classifications made by our fungi model compared with EffectorP 1.0 and EffectorP 2.0 evaluated on both training and validation EffectorP data.", fig.pos="H", message=FALSE}
 
 readr::read_csv("data/processed/conf_mat_effectorp_data_prediction.csv") %>% 
   ggplot2::ggplot() +
@@ -469,7 +479,7 @@ readr::read_csv("data/processed/conf_mat_effectorp_data_prediction.csv") %>%
   ggplot2::coord_fixed()
 ```
 
-```{r effectivet3datacfmat, fig.width=6, fig.height=3, fig.cap="Confusion matrices of classifications made by our bacteria model compared with both EffectiveT3 based on plant associated and all protein evaluated on positive EffectiveT3 data.", fig.pos="H"}
+```{r effectivet3datacfmat, fig.width=6, fig.height=3, fig.cap="Confusion matrices of classifications made by our bacteria model compared with both EffectiveT3 based on plant associated and all protein evaluated on positive EffectiveT3 data.", fig.pos="H", message=FALSE}
 
 readr::read_csv("data/processed/conf_mat_effectivet3_data_prediction.csv") %>% 
   dplyr::mutate(
@@ -497,6 +507,23 @@ readr::read_csv("data/processed/conf_mat_deept3_data_prediction.csv") %>%
   ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
   ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
   ggplot2::facet_grid(data ~ tool) +
+  ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
+  ggplot2::labs(x = "True value", y = "Prediction") +
+  ggplot2::coord_fixed()
+```
+
+
+```{r effectRdatacfmat, fig.width=6, fig.height=3, fig.cap="Confusion matrices of classifications made by our bacteria model compared with both EffectiveT3 based on plant associated and all protein evaluated on positive EffectiveT3 data.", fig.pos="H", message=FALSE}
+
+readr::read_csv("data/processed/conf_mat_effectR_data_prediction.csv") %>% 
+  dplyr::mutate(
+  tool = factor(tool, levels = c("cnn_lstm", "effectR"))
+  ) %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = Truth, y = Prediction) +
+  ggplot2::geom_tile(ggplot2::aes(fill = Freq), colour = "white") +
+  ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = 0.5) +
+  ggplot2::facet_grid(~tool) +
   ggplot2::scale_fill_viridis_c(begin = 0.2, end = 1) +
   ggplot2::labs(x = "True value", y = "Prediction") +
   ggplot2::coord_fixed()
