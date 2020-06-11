@@ -1,6 +1,6 @@
 Data Set,Tool,Metric,Value,Taxon
-6 effectors,cnn_lstm,F1 Score,0.782608696,Oomycete
-6 effectors,effectR,F1 Score,0.923076923,Oomycete
+14 effectors,cnn_lstm,F1 Score,0.782608696,Oomycete
+14 effectors,effectR,F1 Score,0.923076923,Oomycete
 P.syringae NR,ens_weight,F1 Score,0.981595092,Bacteria
 Positive Ind,ens_weight,F1 Score,1,Bacteria
 Positive Training,ens_weight,F1 Score,0.953789279,Bacteria
@@ -19,8 +19,8 @@ EffectorP2 Validation,EffectorP,F1 Score,0.864864865,Fungi
 EffectorP1 Training,EffectorP 2,F1 Score,0.991304348,Fungi
 EffectorP2 Training,EffectorP 2,F1 Score,0.972677596,Fungi
 EffectorP2 Validation,EffectorP 2,F1 Score,0.864864865,Fungi
-6 effectors,cnn_lstm,Accuracy,0.642857143,Oomycete
-6 effectors,effectR,Accuracy,0.857142857,Oomycete
+14 effectors,cnn_lstm,Accuracy,0.642857143,Oomycete
+14 effectors,effectR,Accuracy,0.857142857,Oomycete
 P.syringae NR,ens_weight,Accuracy,0.963855422,Bacteria
 Positive Ind,ens_weight,Accuracy,1,Bacteria
 Positive Training,ens_weight,Accuracy,0.911660777,Bacteria
