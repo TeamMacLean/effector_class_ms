@@ -1,5 +1,0 @@
-Prediction,Truth,Freq,tool
-effector,effector,9,cnn_lstm
-non-effector,effector,5,cnn_lstm
-effector,effector,12,effectR
-non-effector,effector,2,effectR

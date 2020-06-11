@@ -1,7 +1,0 @@
-Prediction,Truth,Freq,data,tool
-effector,effector,113,effectivet3_pos,effectivet3_all
-non-effector,effector,61,effectivet3_pos,effectivet3_all
-effector,effector,70,effectivet3_pos,effectivet3_plant
-non-effector,effector,104,effectivet3_pos,effectivet3_plant
-effector,effector,162,effectivet3_pos,ensemble_weighted
-non-effector,effector,12,effectivet3_pos,ensemble_weighted

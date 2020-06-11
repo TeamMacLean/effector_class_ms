@@ -152,15 +152,11 @@ F1-score is the harmonic average of the precision and recall:
 
 ## Activation Map Analysis
 
-To visualise the regions of the sequences that the models were using to discriminate between effector and non-effector we adapted a Grad-CAM (Gradient-weighted Class Activation Mapping) approach [@Selvaraju2019]. Using this method, we could produce the visualization of one of the convolutional neural network output values when it does a prediction. This will allow us to see which position in peptide sequences is important in determining whether it is effector or non-effector.
+To visualise the regions of the sequences that the models were using to discriminate between effector and non-effector we adapted a Grad-CAM (Gradient-weighted Class Activation Mapping) approach [@Selvaraju2019]. We extracted the convolutional layer `convd_1` and computed the gradient of the model output with respect to the output of `convd_1` The feature map was weighted by every channel and mean result taken. All activation maps were summed, normalised and smoothed using Fourier analysis ^[Ruth, there need to be references, mentions of software and versions used, it isn't easy to see what you actually did from this description]. The code we used for computing and visualising these heatmaps can be found at [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps) .
 
-To find the importance of sequence position detected by our model, we took the output feature map of a convolution layer, given a sequence input. The convolutional layer we chose is the `convd_1` layer. Then, we computed the gradient of model output with the respect of the output of convolutional layer we chose. After that, we weighed every channel of that feature map with the gradient we calculated earlier, and took an average of the result.
+## Effector Prediction Software and Training Data
 
-Following the process mentioned above, we then summed all of the activation map results of all sequences in our datasets for each taxon and normalised them. Next, the final summed activation map for each taxon was smoothed using fourier analysis and plotted the smoothed version for each of them. The code on computing and visualising these heatmaps can be found on [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps) .
-
-## Effector Prediction Software and Training data
-
-To test the performance of our models against commonly used tools we used DeepT3 version 1 [@deept3] and EffectiveT3 version 1.0.1 [@effectivet3] for bacterial sequences. Effector P Version 1.0 and 2.0 [@effectorp, @effectorp2] for fungal sequences and EffectR [@effectR] for oomycete sequences. All the models publish the datasets used to train the models or some examples. We used positive training examples (effector sequence examples) in the comparisons we performed. EffectorP provides three different positive datasets (training, test and hold-out validation) for EffectorP 1.0 and 2.0 at [http://effectorp.csiro.au./data.html](http://effectorp.csiro.au./data.html). EffectiveT3 provides a training set at [https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa](https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa). DeepT3 provides three sets, a non redundant Pseudomonas syringae effector dataset, a training dataset and a test data set at [https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data](https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data). EffectR provides 6 oomycete sequences, namely *PexRD36*, *PexRD1*, *ipi01/Avrblb1*, *Avr1*, *Avr4*, and *Avr3a*. All these sets were used in their respective tools with default settings.   
+To test the performance of our models against commonly used tools we used DeepT3 version 1 [@deept3] and EffectiveT3 version 1.0.1 [@effectivet3] for bacterial sequences. Effector P Version 1.0 and 2.0 [@effectorp, @effectorp2] for fungal sequences and EffectR [@effectR] for oomycete sequences. All the models publish the datasets used to train the models or some examples. We used positive training examples (effector sequence examples) in the comparisons we performed. EffectorP provides three different positive datasets (training, test and hold-out validation) for EffectorP 1.0 and 2.0 at [http://effectorp.csiro.au./data.html](http://effectorp.csiro.au./data.html). EffectiveT3 provides a training set at [https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa](https://effectors.csb.univie.ac.at/sites/eff/files/others/TTSS_positive_training.faa). DeepT3 provides three sets, a non redundant Pseudomonas syringae effector dataset, a training dataset and a test data set at [https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data](https://github.com/lje00006/DeepT3/tree/master/DeepT3/DeepT3-Keras/data). EffectR uses 6 RXLR oomycete sequences described in [@haas2009genome] as examples rather than as a training set, namely *PexRD36*, *PexRD1*, *ipi01/Avrblb1*, *Avr1*, *Avr4*, and *Avr3a* . All these sets were used in their respective tools with default settings.   
 
 
 
@@ -204,14 +200,12 @@ knitr::include_graphics("figures/model_arch.pdf")
 
 ```
 
-```{r acclossfinal}
+```{r, acclossfinal}
  readr::read_tsv("tables/acc_loss_final.tab") %>%
-  knitr::kable( "latex", longtable = T, booktabs = T,
-           digits = 4,
+  apa_table(            digits = 3,
   align = 'c',
   caption = 'Accuracy and loss values from best performing parameters values for each model'
-         ) %>%
-  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
+         )
 ```
 
 We then manually ran and checked the accuracy and loss of the models on the training and validation sets to investigate instances of overfitting and assess generality. Smaller models are less likely to overfit data, so we investigated the effect of regularization rate, filter count and kernel size on the progress and accuracy of the model as we reduced the size. We found that by reducing the number of kernels on all models from 2 to 1 and the number of filters reduced from 32 to 16 we removed apparent overfitting and retained high accuracy, with training completing in 40 epochs. Final training progressions for each model in each taxon can be seen in Figure \@ref(fig:trainingprogress). We tested the finalised models on the hold-out test fraction of the data that had not been previously seen, for the four bacterial sequence trained models we had accuracies in the range 93.4  to 97.4, for the four fungal models we observed accuracy in the range  60.5 to 84.2 and for the four oomycete models we saw accuracy from 64.7 to 82.3, reported in Fig \@ref(fig:overallmodel). All the models we generated had high statistical power and can accurately and reliably classify effectors from other secreted proteins in that taxon.
@@ -369,9 +363,9 @@ readr::read_tsv("tables/ensemble_model_performance_tidy.tab") %>%
 
 Given the accuracies of the above we selected the ensemble bacterial model and the CNN-LSTM fungal and oomycete models to evaluate the performance of our models against widely used effector identification software. We compared against predictions from the bacterial effector prediction programs DeepT3 [@deept3] and EffectiveT3 classification module for plant-associated bacteria 1.0.1 [@effectivet3], the fungal effector prediction programs EffectorP 1.0 and 2.0 [@effectorp, @effectorp2] and the oomycete effector predictor EffectR [@effectR]. Each comparison was carried out using the respective hold-out test sequence set for each taxon. For all taxon we saw greater Accuracy and F1 scores from our models than the established software, as shown in Figure \@ref(fig:vsothersmetrics). This was particularly marked in the F1 score, which incorporates a measure of the incorrect calls. Absolute improvements were up to 15 %  in bacterial sequences, 15 % in fungal sequences and 20 %  in the oomycete sequences. The confusion matrices in Figure \@ref(fig:vsotherscfmat) show that accuracy and F1 score was compromised in all the established tools by the tendency of them all to misclassify true effectors as not effectors.  All the established software classifiers we tested show lower sensitivity than the models we have developed here. 
 
-We also evaluated the deep learning models we have developed on the training and hold-out validation sequences used to train the previous methods. We calculated accuracy and F1 score of all the tools on their respective training and validation sets, according to availability. The bacterial tools EffectiveT3 and DeepT3 showed lower accuracies and F1 score on all sequence sets tested, than our Ensemble Weighted model, as in Figure \@ref(fig:owndata)A, consistent with the observation that our Ensemble Weighted model performed more strongly on the validation set that we generated. Interestingly, both versions of EffectorP showed greater accuracy and F1 score on the EffectorP provided training sets than our CNN-LSTM model, but in the unseen validation data provided with EffectorP 2, all three models performed identically in both metrics \@ref(fig:owndata)B. The EffectorP 1 and 2 scores on validation data are well below the scores for the training data, a result that is usually interpreted as being evidence of an overfitted and less generalisable model. Our CNN-LSTM model for fungi showed similar scores across the training and validation set indicating a greater generability. Only six effector sequences are provided as examples with the oomycete specific effector finder effectR. As this is not a trainable model in the same sense as the others, no large training set is needed. We attempted classification with these and effectR was able to classify 12 of the 14, whereas our CNN-LSTM model for oomycetes classified nine of the 14, see Figure \@ref(fig:owndata)C.
+We also evaluated the deep learning models we have developed on the training and hold-out validation sequences used to train the previous methods. We calculated the proportion of the effectors in the training set that the tools could find on their respective training and validation sets, according to availability. The bacterial tools EffectiveT3 and DeepT3 showed lower proportion found than our Ensemble Weighted model, as in Figure \@ref(fig:owndata)A, consistent with the observation that our Ensemble Weighted model performed more strongly on the validation set that we generated. Interestingly, both versions of EffectorP found a greater proportion of the effectors in the EffectorP provided training sets than our CNN-LSTM model, but in the unseen validation data provided with EffectorP 2, all three models performed identically (Figure \@ref(fig:owndata)B ). The EffectorP 1 and 2 scores on validation data are well below the scores for the training data, a result that is usually interpreted as being evidence of an overfitted and less generalisable model. Our CNN-LSTM model for fungi showed similar scores across the training and validation set indicating a greater generability and equivalent power. Only six effector sequences are provided as examples with the oomycete specific effector finder effectR. As this is not a trainable model in the same sense as the others, no large training set is needed. We attempted classification with these and effectR was able to classify 5 of the 6, whereas our CNN-LSTM model for oomycetes classified 3 of the 6 ( Figure \@ref(fig:owndata)C ).
 
-Overall our model performed more strongly than those previously available ones tested across the range of sequences examined.
+Overall, our models performed more strongly than the previously available ones tested across the range of sequences examined.
 
 ```{r vsothersmetrics, fig.width=8, fig.height=6, fig.cap="Accuracy and F1 score of the classifications made by our models compared with those made by widely used software", fig.pos="H"}
 data.table::fread("data/processed/acc_f1score_vs_othertools.csv") %>%
@@ -440,8 +434,8 @@ d <- readr::read_csv(here::here("data","processed", "owndatasets.csv"))
     df$Tool <- factor(df$Tool, levels = c("cnn_lstm", "ens_weight", "Effective T3 All", "Effective T3 Plants", "Deep T3", "EffectorP", "EffectorP 2", "effectR"))
     p <- df %>% filter(Taxon == which_tax) %>% 
      ggplot() +
-    aes(Tool, Value) +
-    geom_point(aes(colour = Metric)) +
+    aes(Tool, `Proportion Found`) +
+    geom_bar(stat= 'identity', fill = rgb(52/255, 106/255, 141/255), colour = rgb(52/255, 106/255, 141/255), alpha=0.5) +
     facet_grid(  ~ `Data Set`, scales = "free") + 
       theme_bw() +
       scale_color_viridis_d()
@@ -460,9 +454,10 @@ bac / fungi / oom + plot_layout(guides = "collect") + plot_annotation(tag_levels
 
 ## Convolution Heatmaps
 
-An advantage of CNNs relative to other deep neural networks is their relative interpretability. A CNN can be analysed to activation maps which  highlight the regions of the input to which the CNN is most strongly using to classify. To examine the responses of the model, we ran all sequence data sets back through the CNN-LSTM models for each taxon and extracted the network activations using the GRAD-CAM method. The profiles were smoothed using FFT and examined \@ref(fig:activations). All the models showed a peak of activation at the N-terminus of the sequences, coincident with expected positions of secretion signals. The fungal sequences created a single broad activation region with a width of 50 to 100 amino acids while the bacterial and oomycete sequences create a some smaller grouped peaks in a broader region which were each around 20 amino acids. We examined further the sequences under the largest peaks, specifically for bacterial sequences we used amino acids 25 to 50, for fungal sequences we used amino acids 35 to 80 and for oomycete sequences we used amino acids 15 to 40. Compositional analysis of the sequence under the peaks showed no apparent primary sequence conservation or motifs as shown in the logo plots in Fig \@ref(fig:activations) even within a taxon and data set. Enrichment analysis of different amino acid categories showed a statistically significant ($p < 0.05$) increase of hydrophobic amino acids in the effector sequences of bacteria and oomycete sequence regions relative to the combined effector and non effector set \@ref(tab:phyperaatype) and an enrichment of polar amino acids in oomycete sequences, though no enrichment of any type was found in the fungal effectors. These properties are consistent with the secreted role of known effector proteins. 
+An advantage of CNNs relative to other deep neural networks is their relative interpretability. A CNN can be analysed and activation maps extracted which highlight the regions of the input to which the CNN is most strongly relying on to classify. To examine the responses of the models, we ran all sequence data sets back through the CNN-LSTM models for each taxon and extracted the network activations using the GRAD-CAM method. The profiles were smoothed using FFT and examined, (see Figure \@ref(fig:activations) ). All the models showed a peak of activation at the N-terminus of the sequences, coincident with expected positions of secretion signals. The fungal sequences created a single broad activation region with a width of 50 to 100 amino acids while the bacterial and oomycete sequences create a some smaller grouped peaks in a broader region which were each around 20 amino acids. We examined further the sequences under the largest peaks, specifically for bacterial sequences we used amino acids 25 to 50, for fungal sequences we used amino acids 35 to 80 and for oomycete sequences we used amino acids 15 to 40. Compositional analysis of the sequence under the peaks showed no apparent primary sequence conservation or motifs as shown in the logo plots in Fig \@ref(fig:activations) even within a taxon and data set. Enrichment analysis of different amino acid categories showed some statistically significant ($p < 0.05$) changes in proportions of amino acid types relative to the whole set of sequences in the activated regions (Table \@ref(tab:phyperaatype) ). Bacterial effectors are depleted of hydrophobic amino acids and enriched in polar and basic amino acids.
+Fungal effectors are enriched in basic amino acids, with no other differences. The oomycete effectors are most interesting in that their activating regions are depleted in hydrophobic and polar amino acids while enriched in neutral and acidic amino acids.
 
-```{r activations, fig.height=10, fig.width=10, fig.cap="Grad-CAM activation profiles of CNN-LSTM models trained on when run with all datasets; and sequence logo plots of sequence in the activation region within the dotted lines for effector data and non-effector data. A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
+```{r activations, fig.height=10, fig.width=10, fig.cap="Grad-CAM activation profiles of CNN-LSTM models  when run with all datasets; and sequence logo plots of sequence in the activation region within the dotted lines for effector data (left panel) and non-effector data (right panel). A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences."}
 # knitr::include_graphics("figures/convolution_maps_fixed.pdf")
 
 all_bacteria <- rbind(
@@ -609,14 +604,24 @@ oomycete_result <- join_files("data/raw/oomycete_testing.csv", "data/raw/oomycet
 
 r <- bind_rows(list(bacteria_result, fungi_result, oomycete_result))
 r$Taxon <- c("Bacteria", "Fungi", "Oomycete") 
-r <- r %>% select(Taxon, Hydrophobic, Polar, Neutral, Basic, Acidic)
+#r <- r %>% select(Taxon, Hydrophobic, Polar, Neutral, Basic, Acidic)
+r <- r %>% 
+  mutate(Hydrophobic = paste0(sprintf("%.2f", prop_hydro), " : ", sprintf("%.2f",eff_prop_hydro), " (", sprintf("%.2f", p_hydro), ")"),
+         Polar = paste0(sprintf("%.2f", prop_polar), " : ", sprintf("%.2f ",eff_prop_polar), " (", sprintf("%.2f", p_polar), ")"),
+         Neutral = paste0(sprintf("%.2f",prop_neutral), " : ", sprintf("%.2f",eff_prop_neutral), " (", sprintf("%.2f",p_neutral), ")"),
+         Basic = paste0(sprintf("%.2f",prop_basic), " : ", sprintf("%.2f",eff_prop_basic), " (", sprintf("%.2f",p_basic), ")"),
+         Acidic = paste0(sprintf("%.2f",prop_acidic), " : ", sprintf("%.2f",eff_prop_acidic), " (", sprintf("%.2f",p_acidic), ")")
+         ) %>% select(Taxon, Hydrophobic, Polar, Neutral, Basic, Acidic)
 apa_table(
   r,
   digits = 3,
   align = 'c',
-  caption = 'Enrichment analysis of amino acid types. Probability by hypergeometric test of the observed number of amino acid type in the region of activation in effector sequences in our compiled sequence set relative to a background of the same region in all sequences in that taxon.'
+  font_size = 'footnotesize',
+  caption = 'Enrichment analysis of amino acid types. Proportions of each amino acid type in the activation region of All Sequences : Effector Sequences, with (Probability). Probability by hypergeometric test of the observed number of amino acid type in the region of activation in effector sequences in our compiled sequence set relative to a background of the same region in all sequences in that taxon.'
 )
+
 ```
+
 
 
 ## Software Implementation
@@ -637,7 +642,7 @@ To make the models useful for developers in their own analytic pipelines we have
 
 # Discussion
 
-
+We have compiled a set of known experimentally validated effectors from phytopathogenic bacteria, fungi and oomycetes and used them as positive training examples with which to tune a range of CNN classifiers.  
 
 
 
@@ -708,7 +713,7 @@ apa_table(
   readr::read_tsv("tables/tuned_hyperparam.tab"),
   digits = 0,
   align = 'c',
-  caption = 'Hyperparameters tuned in automatic scanning of hyperparameter space for each model'
+  caption = 'Hyperparameters tuned in manual scanning of hyperparameter space for each model'
 )
 ```
 
@@ -725,42 +730,5 @@ readr::read_tsv("tables/hyperparamscan_info.tab") %>%
   kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
 ```
 
-```{r accf1scoreeffectorpdata}
-apa_table(
-  readr::read_csv("data/processed/acc_f1score_result_effectorp_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of EffectorP data evaluated on our model and both EffectorP 1.0 and EffectorP 2.0',
-  placement = "H"
-)
-```
 
-```{r accf1scoreeffectivet3data}
-apa_table(
-  readr::read_csv("data/processed/acc_f1score_result_effectivet3_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of EffeciveT3 positive data evaluated on our model and EffectiveT3 trained on both plant associated protein and all protein.',
-  placement = "H"
-)
-```
-
-```{r accf1scoredeept3data}
-apa_table(
-  readr::read_csv("data/processed/acc_f1score_result_deept3_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of three different DeepT3 positive datasets evaluated on our model and DeepT3.',
-  placement = "H"
-)
-```
-
-```{r accf1scoreeffectRdata}
-apa_table(
-  readr::read_csv("data/processed/acc_f1_score_effectR_data_prediction.csv"),
-  digits = 4,
-  align = 'c',
-  caption = 'Accuracy and F1-Score from prediction results of reference sequences of EffectR evaluated on our model and EffectR.',
-  placement = "H"
-)
 ```
