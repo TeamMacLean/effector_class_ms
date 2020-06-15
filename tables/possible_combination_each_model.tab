@@ -1,5 +1,13 @@
-Model	Possible combination
-CNN-LSTM	216
-CNN-GRU	288
-LSTM Embedding	128
-GRU Embedding	144
+Group	Model	Possible combination
+Bacteria	CNN-LSTM	108
+Bacteria	CNN-GRU	2304
+Bacteria	LSTM Embedding	192
+Bacteria	GRU Embedding	144
+Fungi	CNN-LSTM	108
+Fungi	CNN-GRU	1024
+Fungi	LSTM Embedding	192
+Fungi	GRU Embedding	216
+Oomycete	CNN-LSTM	108
+Oomycete	CNN-GRU	576
+Oomycete	LSTM Embedding	128
+Oomycete	GRU Embedding	2592

@@ -1,5 +1,37 @@
-Model	Fixed hyperparamaters
-CNN-LSTM	strides, padding, activation_convolution, activation_LSTM, epochs
-CNN-GRU	kernel_size, opt_dropout, opt_dropout_recurrent, opt_go_backwards, epochs
-LSTM Embedding	opt_dropout_recurrent, epochs
-GRU Embedding	opt_dropout, opt_dropout_recurrent, epochs
+Group	Model	Fixed hyperparamaters	Values
+Bacteria	CNN-LSTM	strides	1
+Bacteria	CNN-LSTM	padding	valid
+Bacteria	CNN-LSTM	activation_convolution	None
+Bacteria	CNN-LSTM	activation_LSTM	tanh
+Bacteria	CNN-LSTM	epochs	30
+Bacteria	CNN-GRU	opt_go_backwards	TRUE
+Bacteria	CNN-GRU	epochs	30
+Bacteria	LSTM Embedding	opt_dropout_recurrent	0
+Bacteria	LSTM Embedding	epochs	30
+Bacteria	GRU Embedding	opt_dropout	0
+Bacteria	GRU Embedding	opt_dropout_recurrent	0
+Bacteria	GRU Embedding	epochs	30
+Fungi	CNN-LSTM	strides	1
+Fungi	CNN-LSTM	padding	valid
+Fungi	CNN-LSTM	activation_convolution	None
+Fungi	CNN-LSTM	activation_LSTM	tanh
+Fungi	CNN-LSTM	epochs	30
+Fungi	CNN-GRU	opt_go_backwards	TRUE
+Fungi	CNN-GRU	epochs	30
+Fungi	LSTM Embedding	opt_dropout_recurrent	0
+Fungi	LSTM Embedding	epochs	30
+Fungi	GRU Embedding	opt_dropout	0
+Fungi	GRU Embedding	opt_dropout_recurrent	0
+Fungi	GRU Embedding	epochs	30
+Oomycete	CNN-LSTM	strides	1
+Oomycete	CNN-LSTM	padding	valid
+Oomycete	CNN-LSTM	activation_convolution	None
+Oomycete	CNN-LSTM	activation_LSTM	tanh
+Oomycete	CNN-LSTM	epochs	30
+Oomycete	CNN-GRU	kernel_size	2
+Oomycete	CNN-GRU	opt_go_backwards	TRUE
+Oomycete	CNN-GRU	optimizers	Adam
+Oomycete	CNN-GRU	epochs	30
+Oomycete	LSTM Embedding	opt_dropout_recurrent	0
+Oomycete	LSTM Embedding	epochs	30
+Oomycete	GRU Embedding	epochs	30
