@@ -84,15 +84,17 @@ The sequences collected were encoded using either one-hot encoding (CNN-LSTM bas
 
 ## Model Training
 
-We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-GRU, LSTM-Embedding,  GRU-Embedding. We trained each model using a basic random hyperparameter setting initialisation step followed by All training was performed in R 3.5.3, Tensorflow 1.12.0, Keras 2.2.4, Python 3.6.9 on a MacBook Pro (Retina, 13-inch, Early 2013) with an Intel Core i7-3450M (3.00GHz) processor and 8 GB (1600 MHz DDR3) of RAM. ^[Ruth, what about the stuff you did on the cluster with the GPUs? This isn't correct, is it?]. 
+We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-GRU, LSTM-Embedding,  GRU-Embedding. We trained each model using a basic random hyperparameter setting initialisation step followed by hyperparamter scans. All models were implemented in Python 3.6.9 using the deep learning API Keras 2.2.4 with Tensorflow 1.12.0 backend, using GPU NVIDIA GK110GL Tesla K20c and CPU AMD Opteron(TM) Processor 6272 with memory 128 GB. 
+
 
 ### Hyperparameter Scans
 
-Hyperparameter scans were performed in ^[Ruth, can you outline the packages and methods in scikit-learn/tensorflow that you used for this] Code for this can be found in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts). All modle training was performed as described in section Model Training.
+Hyperparameter scans were performed using random search, a hyperparameter optimization method which 
+implements a randomized search over hyperparameters, where each hyperparameter setting is randomly sampled from a distribution over possible hyperparameter values [@Bergstra2012]. In particularly, we used RandomSearchCV(), the implementation of random search method in `scikit-learn 0.19.2` [@scikit-learn] together with KerasClassifier() which is implementation of the scikit-learn classifier API for keras. Code for this can be found in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts). All model training was performed as described in section Model Training.
 
 ### Fine tuning
 
-Fine tuning was performed manually using Tensorflow/scikit learn ^[Ruth, can you add the software and versions your scripts used here] Scripts implementing the tuning can be found at  [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts). 
+Fine tuning was performed manually using `keras 2.2.4` together with metrics module and KFold cross validator from `scikit-learn 0.19.2`. Scripts implementing the tuning can be found at  [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts). 
 
 ### Model Classification Correlation
 
@@ -152,7 +154,7 @@ F1-score is the harmonic average of the precision and recall:
 
 ## Activation Map Analysis
 
-To visualise the regions of the sequences that the models were using to discriminate between effector and non-effector we adapted a Grad-CAM (Gradient-weighted Class Activation Mapping) approach [@Selvaraju2019]. We extracted the convolutional layer `convd_1` and computed the gradient of the model output with respect to the output of `convd_1` The feature map was weighted by every channel and mean result taken. All activation maps were summed, normalised and smoothed using Fourier analysis ^[Ruth, there need to be references, mentions of software and versions used, it isn't easy to see what you actually did from this description]. The code we used for computing and visualising these heatmaps can be found at [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps) .
+To visualise the regions of the sequences that the models were using to discriminate between effector and non-effector we adapted a Grad-CAM (Gradient-weighted Class Activation Mapping) approach [@Selvaraju2019]. We extracted the convolutional layer `convd_1` and computed the gradient of the model output with respect to the output of `convd_1`. The feature map was weighted by every channel and mean result taken. All activation maps were summed, normalised and smoothed using Fourier analysis. We used `tensorflow 1.12.0` to compute the activation maps and discrete fourier transform (numpy.fft) from `numpy 1.17.3` to smooth the result. The code we used for computing and visualising these heatmaps can be found at [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/heatmaps) .
 
 ## Effector Prediction Software and Training Data
 
@@ -194,7 +196,7 @@ apa_table(
 ## Model Selection and Training
 In order to identify a useful classifier we took a randomised hyperparamter search over some likely base model architectures. We selected four base architectures on which to build models for learning. Two of these contained Convolutional Neural Network (CNN) layers followed by either a Long Short Term Memory Layer (LSTM) or a Gated Recurrent Unit (GRU), two contained an Embedding Layer followed by the LSTM or GRU. All models had fully-connected dense layers after this. See Figure \@ref(fig:modelarch).
 
-We defined a range of values for the hyperparameters that could be optimised in each architecture, 10 for CNN-LSTM, 12 for CNN-GRU, 9 for LSTM-Embedding and 9 for GRU-Embedding. To test all combinations of values in these ranges would take a prohibitive amount of processor time, so we selected 50 sets of values for each model in each taxon at random to start training, `r 120 * 50` models in total. ^[Ruth, can you confirm that this interpretation is correct]  Model variants within the hyperparameter search were assessed by comparing accuracy values on the development validation fraction of the training data. Other hyperparameters were fixed and are listed in Table \@ref(tab:fixedhyperparam) ^[Ruth, please can you add the actual values that were used to this table, as in table \@ref(tab:possiblecombination)] For each model type and taxon training data combination we selected the hyperparameter set giving highest accuracy on the validation fraction, the best performing values can be see in Table \@ref(tab:possiblecombination). From this we had twelve candidate models to develop further. 
+We defined a range of values for the hyperparameters that could be optimised in each architecture, 10 for CNN-LSTM, 12 for CNN-GRU, 9 for LSTM-Embedding and 9 for GRU-Embedding. To test all combinations of values in these ranges would take a prohibitive amount of processor time, so we selected 50 sets of values for each model in each taxon at random to start training, `r 3 * 4 * 50 * 5` models in total. ^[For each architecture, 50 models are selected randomly. Therefore there are 3 taxon * 4 architecture * 50 models * 5 cross validation]  Model variants within the hyperparameter search were assessed by comparing accuracy values on the development validation fraction of the training data. Other hyperparameters were fixed and are listed in Table \@ref(tab:fixedhyperparam). For each model type and taxon training data combination we selected the hyperparameter set giving highest accuracy on the validation fraction. ^[\@ref(tab:possiblecombination) is table of total number of all hyperparameter settings in the whole hyperparameter space for each architecture] From this we had twelve candidate models to develop further. 
 
 ```{r modelarch, fig.width=10, fig.height=10, fig.cap="Overview of model architectures tested in this analysis, A: CNN-LSTM model; B: CNN-GRU model; C: LSTM-Embedding model; D: GRU-Embedding model"}
 knitr::include_graphics("figures/model_arch.pdf")
@@ -209,7 +211,7 @@ knitr::include_graphics("figures/model_arch.pdf")
          )
 ```
 
-We then manually ran and checked the accuracy and loss of the twelve models on the training and validation sets to investigate instances of overfitting and assess generality. Smaller models are less likely to overfit data, so we investigated the effect of regularization rate, filter count and kernel size on the progress and accuracy of the model as we reduced the size. Parameters varied in this phase are listed in \@ref(tab:tunedhyperparam). ^[Ruth, please can you add the actual values that were used to this table, as in table \@ref(tab:possiblecombination)] Final selected hyperparameter settings for models in each taxon can be seen in Table \@ref(tab:hyperparam). The values of accuracy and loss of each model produced are shown in Table \@ref(tab:acclossfinal). We found that by reducing the number of kernels on all models from 2 to 1 and the number of filters reduced from 32 to 16 we removed apparent overfitting and retained high accuracy, with training completing in 40 epochs.
+We then manually ran and checked the accuracy and loss of the twelve models on the training and validation sets to investigate instances of overfitting and assess generality. Smaller models are less likely to overfit data, so we investigated the effect of regularization rate, filter count and kernel size on the progress and accuracy of the model as we reduced the size. Parameters varied in this phase are listed in \@ref(tab:tunedhyperparam). Final selected hyperparameter settings for models in each taxon can be seen in Table \@ref(tab:hyperparam). The values of accuracy and loss of each model produced are shown in Table \@ref(tab:acclossfinal). We found that by reducing the number of kernels on all models from 2 to 1 and the number of filters reduced from 32 to 16 we removed apparent overfitting and retained high accuracy, with training completing in 40 epochs.
 
 Final training progressions for each model in each taxon can be seen in Figure \@ref(fig:trainingprogress). We tested the finalised models on the hold-out test fraction of the data that had not been previously seen, for the four bacterial sequence trained models we had accuracies in the range 93.4  to 97.4, for the four fungal models we observed accuracy in the range  60.5 to 84.2 and for the four oomycete models we saw accuracy from 64.7 to 82.3, reported in Fig \@ref(fig:overallmodel). All the models we generated had high statistical power and can accurately and reliably classify effectors from other secreted proteins in that taxon.
 
@@ -651,7 +653,7 @@ We have compiled a set of known experimentally validated effectors from phytopat
 
 A common misconception of deep learning models is that training datasets need to be extremely large, this is only half true. In fact, in practice training data need only to be large with respect to the model size. Here we have coupled small data sets (tens or hundreds of training examples) with small models. The layers and architectures of the models presented here are much smaller than those typically used in large machine vision projects for example. Yet the small models remain useful and have predictive power, indicating a definite role for deep learning approaches in the work of bioinformaticians without truly massive datasets.
 
-Training the models proved to be computationally expensive, the architectures used have a large number of parameters and hyperparameters to be optimised and although only a small fraction ^[Ruth, have we any idea what this fraction might be] of the possible hyperparameter and parameter space was explored we still compared 6000 models. At a run time of around ^[Ruth, approx run time per model] So even for relatively small data sets, a large amount of specialised GPU compute power is required. 
+Training the models proved to be computationally expensive, the architectures used have a large number of parameters and hyperparameters to be optimised and although only a small fraction ^[This fraction depends for every model, the parameter space is shown in table \@ref(tab:possiblecombination)] of the possible hyperparameter and parameter space was explored we still compared `r 3 * 4 * 50 * 5` models. At a run time of around 144 minutes for CNN-LSTM, 57.2 minutes for CNN-GRU, and 45 minutes for both GRU Embedding and LSTM Embedding. So even for relatively small data sets, a large amount of specialised GPU compute power is required. 
 
 The models we created performed exceptionally on the PHI-Base hold-out validation data set of phytopathogenic effector sequences. The greater than 80 % classification accuracy for the fungal and oomycete models is an excellent accuracy on such sequences and our models outperformed the other classifiers tested by large margins on the PHI-Base fungal, no other machine learning method has been reported to have performed as well on phytopathogen sequences. The greater than 97 % accuracy we observed in our model trained on bacterial phytopathogen effectors is also exceptional and similar to what Xue et al [@deept3] showed in human bacterial pathogen effectors. When we evaluated the proportion of effectors each of our and other classifiers could find in data used to create the other classifiers, we found that our bacterial model outperformed the bacterial models again. A slightly different picture emerged when we compared our method with EffectorP 1 and 2 on fungal data. Both versions of Effector P outperformed our model on training data used to create Effector P in the first instance but identical predictions were made by all fungal classifiers on the validation set provided by Effector P 2. This was coincident with a large drop in accuracy from training to validation data by Effector P 1 and 2.  Combined with observations on our PHI-Base data on higher numbers of false positives from Effector P, we conclude that Effector P is over-fitted slightly on its training data and that our model is likely to be more generally accurate. We expect that the tools used in concert will provide very good classification and prediction of fungal effectors. Our model also performed worse on the data used to test the untrained heuristic oomycete RXLR sequence detector EffectR, finding three of six, relative to EffectR's five of six. This is likely due to the six test sequences being exclusively RXLR and our model being trained on effectors in general, the presence of RXLR not being diagnostic of effector-ness in our model means Researchers hoping to find exclusively RXLR containing proteins would be advised to use EffectR, those hoping to find effectors beyond RXLRs may find utility with our oomycete model.
 
@@ -717,21 +719,43 @@ apa_table(
 ```
 
 ```{r, fixedhyperparam}
-apa_table(
-  readr::read_tsv("tables/fixed_hyperparam.tab"),
-  digits = 0,
-  align = 'c',
-  caption = 'Hyperparameters fixed in automatic scanning of hyperparameter space for each model'
-)
+# apa_table(
+#   readr::read_tsv("tables/fixed_hyperparam.tab"),
+#   digits = 0,
+#   align = 'c',
+#   caption = 'Hyperparameters fixed in automatic scanning of hyperparameter space for each model'
+# )
+
+readr::read_tsv("tables/fixed_hyperparam.tab") %>%
+  knitr::kable(
+    "latex", 
+    longtable = T, 
+    booktabs = T,
+    digits = 0,
+    align = 'c',
+    caption = 'Hyperparameters fixed in automatic scanning of hyperparameter space for each model'
+  ) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
 ```
 
 ```{r, tunedhyperparam}
-apa_table(
-  readr::read_tsv("tables/tuned_hyperparam.tab"),
-  digits = 0,
-  align = 'c',
-  caption = 'Hyperparameters tuned in manual scanning of hyperparameter space for each model'
-)
+# apa_table(
+#   readr::read_tsv("tables/tuned_hyperparam.tab"),
+#   digits = 0,
+#   align = 'c',
+#   caption = 'Hyperparameters tuned in manual scanning of hyperparameter space for each model'
+# )
+
+readr::read_tsv("tables/tuned_hyperparam.tab") %>%
+  knitr::kable(
+    "latex", 
+    longtable = T, 
+    booktabs = T,
+    digits = 0,
+    align = 'c',
+    caption = 'Hyperparameters tuned in manual scanning of hyperparameter space for each model'
+  ) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
 ```
 
 ```{r, hyperparam}
@@ -747,5 +771,3 @@ readr::read_tsv("tables/hyperparamscan_info.tab") %>%
   kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
 ```
 
-
-```
