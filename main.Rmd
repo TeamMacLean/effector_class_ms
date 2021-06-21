@@ -16,7 +16,7 @@ fontfamily: sans
 papersize: a4paper
 author:
   - name: Ruth Kristianingsih, Dan MacLean
-  - affiliation: The Sainsbury Laboratory, University of East Anglia, Norwich Research Park, Norwich, UK, NR4 7JJ, dan.maclean@tsl.ac.uk
+  - affiliation: The Sainsbury Laboratory, University of East Anglia, Norwich Research Park, Norwich, UK, NR4 7UH, dan.maclean@tsl.ac.uk
 abstract: ""
 geometry: margin=1in
 biblio-style: apsr
@@ -26,6 +26,7 @@ header-includes:
   - \usepackage{amsmath}
   - \usepackage{siunitx}
   - \usepackage{float}
+  - \usepackage{placeins}
 ---
 
 ```{r setup, include = FALSE}
@@ -68,7 +69,7 @@ fig_caption("vsotherscfmat", "Confusion matrices of classifications made by our 
 
 fig_caption("owndata", "Performance of models on training and validation datasets used to train other effector prediction tools. A: Tools trained on bacterial sequences; B: Tools trained on fungal sequences; C: Tools trained on oomycete sequences.")
 
-fig_caption("activations", "Grad-CAM activation profiles of CNN-LSTM models  when run with all datasets; and sequence logo plots of sequence in the activation region within the dotted lines for effector data (left panel) and non-effector data (right panel). A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.")
+fig_caption("activations", "Grad-CAM activation profiles of CNN-LSTM models  when run with all datasets showing the region of the sequence the model is most able to use to classify (leftmost panel). The most active part of the sequences are shown in logo plots of sequences extracted from the activation region within the dotted lines for effector data (centre panel) and non-effector data (rightmost panel). A: Models trained on bacterial sequences; B: Models trained on fungal sequences; C: Models trained on oomycete sequences.")
 
 
 tbl_caption <- captioner::captioner(prefix = "Table ")
@@ -112,20 +113,20 @@ Machine learning (ML) algorithms are a general group of techniques most often us
 
 Deep learning models are distinct from other machine learning processes in that pre-selection of important features is far less critical and the models can learn these features unsupervised from training data [@Jurtz:2017cr]. This property removes the need to know which properties of a data set must be examined before data collection begins. The Deep learning models can therefore classify on properties not necessarily known to the operator and could be used to uncover cryptic patterns in data. Convolutional neural networks (CNNs) are a type of neural network that have found wide application in numerous machine vision problems, including image object classification and facial identification [@krizhevsky2012, @lawrence1997], in time-series data analysis [@pyrkov2018] and natural language processing [@collobert2008]. In the biomedical domain they have been used in drug discovery [@wallach2015] and gene network prediction [@maclean2019]. In studies with bacterial type III secreted effectors Xue et al developed an accurate CNN classifier for bacterial sequences [@deept3]. CNNs encode information about the features used to classify that can be extracted and interpreted. In a sequence classification problems this means they have the potential to reveal novel sequence features that other bioinformatics approaches have not and could be of particular utility when analysing sets of effectors.
 
-Deep learning approaches require positive and negative examples from which to learn - here a list of sequences annotated as an effector or not. The larger and more accurate the list the more sensitivity a model can obtain. It is critical that training examples are experimentally verified effectors. Much of the effector annotation in public genomics databases is from computational predictions of genomics and is therefore of experimentally unverified hypothetical effectors. A good source of experimentally verified data is in the Molecular Plant Microbe Interactions (MPMI) literature and The widest ranging manual curation of MPMI papers is being performed as part of the PHI-Base [@phibase] database strategy, PHI-base is an expertly curated database of genes proven experimentally to affect the outcome of pathogen host interactions and is therefore an excellent source of reliable effector sequences.
+Deep learning approaches require positive and negative examples from which to learn. We used a list of sequences annotated as an effector or not. It is generally held and expected that he larger and more accurate the list the more sensitivity a model can obtain. It is critical that training examples are experimentally verified effectors. Much of the effector annotation in public genomics databases is from computational predictions of genomics and is therefore of experimentally unverified hypothetical effectors. A good source of experimentally verified data is in the Molecular Plant Microbe Interactions (MPMI) literature and The widest ranging manual curation of MPMI papers is being performed as part of the PHI-Base [@phibase] database strategy, PHI-base is an expertly curated database of genes proven experimentally to affect the outcome of pathogen host interactions and is therefore an excellent source of reliable effector sequences.
 
-Here we use combinations of CNNs that do not rely on _a priori_ feature selection to classify experimentally verified effectors and non-effectors in three taxa of plant pathogen: bacterial, fungal and oomycete. We show that these have very strong predictive power, can outperform existing effector prediction methods in accuracy and a better balance of sensitivity and specificity.  We also analyse the activations of the models in response to effectors and non-effectors to gain insights into the sequence features that are allowing classification. We have produced an R package that will allow other scientists to easily classify their own sequences of interest.
+Here we use combinations of CNNs that do not rely on _a priori_ feature selection to classify experimentally verified effectors and non-effectors in three taxa of plant pathogen: bacterial, fungal and oomycete. We show that these have very strong predictive power, can outperform existing effector prediction methods in accuracy and a better balance of sensitivity and specificity.  We also analyse the activations of the models in response to effectors and non-effectors to gain insights into the sequence features that are allowing classification. We have produced an R package that will allow other scientists to easily classify their own sequences of interest, available at [https://ruthkr.github.io/deepredeff](https://ruthkr.github.io/deepredeff).
 
 
 # Implementation
 
 ## Sequence Data Collection
 
-Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data prepared on request by the PHI-Base team, the file can be accessed at [https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in Figure \@ref(effectorcollection) outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release 2019_05, using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [@yates2020] : specifically Ensembl Fungi, Protists and Bacteria manually using the BioMart tools [@smedleybiomart2009]. Since the BioMart tool is not available on Ensembl Bacteria, we downloaded whole proteome protein sequnces from species matched to those from which the effector came using FTP. With these we used SignalP 3.0 [@dyrlovbendtsen2004] in order to filter the secreted sequences and selected accordingly. We used default paramaters from SignalP, except the type of organism group which is `euk` for both fungi and oomycete sequences, and `gram-` or `gram+` for bacteria sequences. Redundant sequences were filtered using BLASTp [@camachoblast2009]. We achieved these steps using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd).
+Sequence data were collected from the PHI-Base database version 4.8 [@phibase] by accessing a text dump of the data prepared on request by the PHI-Base team, the file can be accessed at [https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv](https://github.com/PHI-base/data/blob/master/releases/phi-base_current.csv). The pipeline in `r fig_caption("effectorcollection", display="cite")` outlines the steps used. We filtered plant effector proteins and their taxonomic groups and collected sequences from UniProt Release 2019_05, using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-data-new/binary-class/0001_first_step_getting_data.Rmd). We created a correspondingly sized data set of non-effectors with secretion signals originating in species matched to those from which the effectors were drawn. We downloaded sequences for randomly selected proteins matching these criteria from Ensembl databases [@yates2020] : specifically Ensembl Fungi, Protists and Bacteria manually using the BioMart tools [@smedleybiomart2009]. Since the BioMart tool is not available on Ensembl Bacteria, we downloaded whole proteome protein sequnces from species matched to those from which the effector came using FTP. With these we used SignalP 3.0 [@dyrlovbendtsen2004] in order to filter the secreted sequences and selected accordingly. We used default paramaters from SignalP, except the type of organism group which is `euk` for both fungi and oomycete sequences, and `gram-` or `gram+` for bacteria sequences. Redundant sequences were filtered using BLASTp [@camachoblast2009]. We achieved these steps using the code in [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0005_process_signalp_data.Rmd).
 
 ## Encoding and Subsetting Sequences
 
-The sequences collected were encoded using either one-hot encoding (CNN-LSTM based models) or integer based encoding (CNN-GRU-LSTM models). Sequences were post-padded with zeroes to bring the vectors to identical lengths to each other and the longest sequence in the taxon data set. The longest sequence  for bacteria, fungi, and oomycete are 2574, 4034, and 934, respectively. Encoded sequences were split into taxon specific training, test and validation sets at a 60%, 20%, 20% split respectively as described in code at [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd)
+The sequences collected were encoded using either one-hot encoding (CNN-LSTM based models) or integer based encoding (CNN-GRU-LSTM models). Sequences were post-padded with zeroes to bring the vectors to identical lengths to each other and the longest sequence in the taxon data set. The longest sequence  for bacteria, fungi, and oomycete are 2574, 4034, and 934, respectively. Encoded sequences were split into random taxon specific training, test and validation sets at a 60%, 20%, 20% split respectively as described in code at [https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd](https://github.com/TeamMacLean/ruth-effectors-prediction/blob/master/scripts/r-scripts/getting-secreted-data/0008_split_and_encode.Rmd).
 
 
 ## Model Training
@@ -135,11 +136,11 @@ We trained four model types on each taxon specific sequence set: CNN-LSTM, CNN-G
 
 ### Hyperparameter Scans
 
-Hyperparameter scans were performed using random search, a hyperparameter optimization method where each hyperparameter setting is randomly sampled from a distribution of possible hyperparameter values [@Bergstra2012]. We used RandomSearchCV(), the implementation of random search in `scikit-learn 0.19.2` [@scikitlearn] together with KerasClassifier() which is an implementation of the scikit-learn classifier API for keras. Code for this can be found in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts). All model training was performed as described in section Model Training.
+Hyperparameter scans were performed using random search, a hyperparameter optimization method where each hyperparameter setting is randomly sampled from a distribution of possible hyperparameter values [@Bergstra2012]. Hyperparameters to vary were selected as the ones generally known and expected to have strongest effect. We used RandomSearchCV(), the implementation of random search in `scikit-learn 0.19.2` [@scikitlearn] together with KerasClassifier() which is an implementation of the scikit-learn classifier API for keras. Code for this can be found in [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/hyperparameter-scan-scripts). All model training was performed as described in section Model Training.
 
 ### Fine tuning
 
-Fine tuning was performed manually using `keras 2.2.4` together with metrics module and KFold cross validator from `scikit-learn 0.19.2`. Scripts implementing the tuning can be found at  [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts). 
+Fine tuning was performed manually using `keras 2.2.4` together with metrics module and KFold cross validator from `scikit-learn 0.19.2`. Scripts implementing the tuning can be found at  [https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts](https://github.com/TeamMacLean/ruth-effectors-prediction/tree/master/scripts/python-scripts/manual_tune_scripts). Five-fold cross validation was used in all instances.
 
 ### Model Classification Correlation
 
@@ -782,42 +783,46 @@ We wish to thank Martin Page, Ram Krishna Shrestha, the NBI Computing Infrastuct
 \beginsupplement
 
 ```{r, bacefftable, echo=FALSE, message = FALSE}
-apa_table(
-  readr::read_tsv("tables/bacterial_effector_count.tab"),
+  readr::read_tsv("tables/bacterial_effector_count.tab") %>% 
+  knitr::kable( "latex",
   digits = 0,
   align = 'c',
-  caption = 'Bacterial species contributing to the bacterial effector sequence set retrieved from PHI-Base',
-  placement = "h"
-)
+  caption = 'Bacterial species contributing to the bacterial effector sequence set retrieved from PHI-Base'
+) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header","hold_position"), font_size = 7)
 ```
 
 ```{r, fungiefftable}
-apa_table(
-  readr::read_tsv("tables/fungal_effector_count.tab"),
+  readr::read_tsv("tables/fungal_effector_count.tab") %>% 
+  knitr::kable( "latex",
   digits = 0,
   align = 'c',
   caption = 'Fungal species contributing to the fungal effector sequence set retrieved from PHI-Base'
-)
+) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header","hold_position"), font_size = 7)
 ```
 
 ```{r, oomefftable}
-apa_table(
-  readr::read_tsv("tables/oomycete_effector_count.tab"),
+  readr::read_tsv("tables/oomycete_effector_count.tab") %>% 
+  knitr::kable( "latex",
   digits = 0,
   align = 'c',
   caption = 'Oomycete species contributing to the oomycete effector sequence set retrieved from PHI-Base'
-)
+) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header","hold_position"), font_size = 7)
 ```
 
 ```{r, possiblecombination}
-apa_table(
-  readr::read_tsv("tables/possible_combination_each_model.tab"),
+
+  readr::read_tsv("tables/possible_combination_each_model.tab")%>% 
+  knitr::kable( "latex",
   digits = 0,
   align = 'c',
   caption = 'List of possible combination of hyperparamaters setting for each model'
-)
+) %>%
+  kableExtra::kable_styling(latex_options = c("repeat_header","hold_position"), font_size = 7)
 ```
-
+\newpage
 ```{r, fixedhyperparam}
 # apa_table(
 #   readr::read_tsv("tables/fixed_hyperparam.tab"),
@@ -835,9 +840,9 @@ readr::read_tsv("tables/fixed_hyperparam.tab") %>%
     align = 'c',
     caption = 'Hyperparameters fixed in automatic scanning of hyperparameter space for each model'
   ) %>%
-  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
+  kableExtra::kable_styling(latex_options = c("repeat_header","hold_position"), font_size = 7)
 ```
-
+\newpage
 ```{r, tunedhyperparam}
 # apa_table(
 #   readr::read_tsv("tables/tuned_hyperparam.tab"),
@@ -855,7 +860,7 @@ readr::read_tsv("tables/tuned_hyperparam.tab") %>%
     align = 'c',
     caption = 'Hyperparameters tuned in manual scanning of hyperparameter space for each model'
   ) %>%
-  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
+  kableExtra::kable_styling(latex_options = c("repeat_header", "hold_position"), font_size = 7)
 ```
 
 ```{r, hyperparam}
@@ -868,7 +873,7 @@ readr::read_tsv("tables/hyperparamscan_info.tab") %>%
     align = 'c',
     caption = 'Hyperparameters used in automatic scanning of hyperparameter space and best performing parameters values for each model'
   ) %>%
-  kableExtra::kable_styling(latex_options = c("repeat_header"), font_size = 7)
+  kableExtra::kable_styling(latex_options = c("repeat_header", "hold_position"), font_size = 7)
 ```
 
 \newpage
